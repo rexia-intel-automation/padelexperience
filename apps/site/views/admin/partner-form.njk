@@ -1,0 +1,54 @@
+{% extends "layouts/admin.njk" %}
+{% block content %}
+
+<div class="admin-topbar">
+  <div>
+    <h1>{{ 'Editar parceiro' if item else 'Novo parceiro' }}</h1>
+    <p>Logotipo oficial e regras de co-branding devem ser obtidos com a parceira antes da publicação.</p>
+  </div>
+  <a class="btn btn-ghost btn-sm" href="/admin/parceiros">Voltar</a>
+</div>
+
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+
+<form class="form-grid card" method="post" enctype="multipart/form-data"
+      action="{{ '/admin/parceiros/' + item.id if item else '/admin/parceiros' }}">
+  <input type="hidden" name="csrf" value="{{ csrfToken }}">
+  <div class="field">
+    <label for="name">Nome</label>
+    <input class="input" type="text" id="name" name="name" value="{{ item.name if item }}" required>
+  </div>
+  <div class="field">
+    <label for="role">Função</label>
+    <input class="input" type="text" id="role" name="role" value="{{ item.role if item }}">
+    <small>Ex.: Materiais esportivos, Construção das quadras, Cenografia, Lounge VIP.</small>
+  </div>
+  <div class="field">
+    <label for="description">Descrição</label>
+    <textarea class="input" id="description" name="description" rows="4">{{ item.description if item }}</textarea>
+  </div>
+  <div class="field">
+    <label for="instagram_url">Instagram (URL)</label>
+    <input class="input" type="url" id="instagram_url" name="instagram_url" value="{{ item.instagram_url if item }}">
+  </div>
+  <div class="field">
+    <label for="announcement_url">Anúncio da parceria (URL)</label>
+    <input class="input" type="url" id="announcement_url" name="announcement_url" value="{{ item.announcement_url if item }}">
+  </div>
+  <div class="field">
+    <label for="logo">Logo</label>
+    {% if item and item.logo %}<img class="form-thumb" src="{{ item.logo }}" alt="Logo atual">{% endif %}
+    <input class="input" type="file" id="logo" name="logo" accept="image/*">
+    <small>Sem logo, o card aparece só com texto no site.</small>
+  </div>
+  <div class="field">
+    <label for="sort">Ordem</label>
+    <input class="input" type="number" id="sort" name="sort" value="{{ item.sort if item else 0 }}">
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Salvar</button>
+    <a class="btn btn-ghost" href="/admin/parceiros">Cancelar</a>
+  </div>
+</form>
+
+{% endblock %}

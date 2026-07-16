@@ -1,0 +1,20 @@
+{% extends "layouts/admin.njk" %}
+{% block content %}
+
+<div class="admin-topbar">
+  <div>
+    <h1>Confirmar exclusão</h1>
+    <p>Esta ação não pode ser desfeita.</p>
+  </div>
+</div>
+
+<div class="card" style="max-width:560px">
+  <p style="margin:0 0 18px">Excluir <strong>{{ itemLabel }}</strong>?</p>
+  <form method="post" action="{{ actionUrl }}" class="form-actions" style="margin:0">
+    <input type="hidden" name="csrf" value="{{ csrfToken }}">
+    <button class="btn btn-danger" type="submit">Excluir definitivamente</button>
+    <a class="btn btn-ghost" href="{{ backUrl }}">Cancelar</a>
+  </form>
+</div>
+
+{% endblock %}

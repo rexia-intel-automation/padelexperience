@@ -1,0 +1,13 @@
+domínio: www.padelexperience.com.br
+
+linktree: https://linktr.ee/padel.exp
+
+link appstore: https://apps.apple.com/br/app/padel-experience-br/id6780433030
+
+link google play: https://play.google.com/store/apps/details?id=es.tpc.matchpoint.appclient.padelexperiencebr
+
+link parcerias: parcerias@padelexperience.com.br
+
+link grupo vip do whatsapp: https://www.whatsapp.com/channel/0029VbBqbSQGJP8ETgstVM29
+
+link atendimento whatsapp: https://api.whatsapp.com/send/?phone=556192927630&text&type=phone_number&app_absent=0

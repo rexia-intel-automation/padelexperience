@@ -1,0 +1,39 @@
+{% extends "layouts/admin.njk" %}
+{% block content %}
+
+<div class="admin-topbar">
+  <div>
+    <h1>Equipamentos</h1>
+    <p>Itens de locação exibidos na seção "Equipamentos" do site.</p>
+  </div>
+  <a class="btn btn-primary" href="/admin/equipamentos/novo">Novo equipamento</a>
+</div>
+
+{% if items.length %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Nome</th><th>Descrição</th><th>Preço</th><th>Unidade de cobrança</th><th>Ordem</th><th></th></tr></thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.description }}</td>
+        <td>R$ {{ item.price }}</td>
+        <td>{% if item.unit %}{{ item.unit }}{% else %}<span class="source-chip caution">[A CONFIRMAR]</span>{% endif %}</td>
+        <td>{{ item.sort }}</td>
+        <td>
+          <div class="row-actions">
+            <a class="btn btn-ghost btn-sm" href="/admin/equipamentos/{{ item.id }}/editar">Editar</a>
+            <a class="btn btn-danger btn-sm" href="/admin/equipamentos/{{ item.id }}/excluir">Excluir</a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty"><div><h3>Nenhum equipamento cadastrado</h3><p>Adicione o primeiro item de locação.</p><a class="btn btn-primary" href="/admin/equipamentos/novo">Novo equipamento</a></div></div>
+{% endif %}
+
+{% endblock %}

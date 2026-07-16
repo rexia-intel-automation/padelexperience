@@ -1,0 +1,38 @@
+{% extends "layouts/admin.njk" %}
+{% block content %}
+
+<div class="admin-topbar">
+  <div>
+    <h1>Parceiros</h1>
+    <p>Marcas exibidas na seção "Parceiros". Use "parceira" ou a função específica — nunca "patrocinadora" sem respaldo contratual.</p>
+  </div>
+  <a class="btn btn-primary" href="/admin/parceiros/novo">Novo parceiro</a>
+</div>
+
+{% if items.length %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Nome</th><th>Função</th><th>Logo</th><th>Ordem</th><th></th></tr></thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.role }}</td>
+        <td>{% if item.logo %}<span class="badge success">Enviado</span>{% else %}<span class="source-chip caution">Pendente</span>{% endif %}</td>
+        <td>{{ item.sort }}</td>
+        <td>
+          <div class="row-actions">
+            <a class="btn btn-ghost btn-sm" href="/admin/parceiros/{{ item.id }}/editar">Editar</a>
+            <a class="btn btn-danger btn-sm" href="/admin/parceiros/{{ item.id }}/excluir">Excluir</a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty"><div><h3>Nenhum parceiro cadastrado</h3><p>Adicione a primeira marca parceira.</p><a class="btn btn-primary" href="/admin/parceiros/novo">Novo parceiro</a></div></div>
+{% endif %}
+
+{% endblock %}

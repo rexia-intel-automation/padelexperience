@@ -1,0 +1,15 @@
+{
+  "name": "site-padelexp",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/site",
+    "start": "npm run start --workspace=apps/site"
+  }
+}

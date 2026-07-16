@@ -1,0 +1,141 @@
+{% extends "layouts/public.njk" %}
+{% block content %}
+
+<main id="inicio">
+  <section class="shell hero">
+    <div>
+      <span class="eyebrow">Aeroporto de Brasília — bolsão A</span>
+      <h1>Jogue.<br><span>Viva.</span><br>Repita.</h1>
+      <p>Espaço de padel voltado a jogadores, visitantes, conexões e experiências. Quadras abertas todos os dias, 24 horas, no Aeroporto Internacional de Brasília.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="{{ bookingUrl }}" target="_blank" rel="noopener">Reservar quadra
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="btn btn-outline" href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
+      </div>
+    </div>
+    <div class="hero-panel">
+      {% if gallery.length %}<img src="{{ gallery[0].image }}" alt="{{ gallery[0].caption }}">{% endif %}
+      <div class="hero-badge">
+        <div><strong>{{ settings.hours }}</strong><br><span>{{ settings.location }}</span></div>
+        <span class="badge highlight">24h</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-label="Conceitos de marca">
+    <div class="marquee-track">
+      <div class="marquee-item"><i></i>jogue todos os dias</div><div class="marquee-item"><i></i>24 horas</div><div class="marquee-item"><i></i>experiência premium</div><div class="marquee-item"><i></i>reserva simples</div><div class="marquee-item"><i></i>comunidade ativa</div>
+      <div class="marquee-item"><i></i>jogue todos os dias</div><div class="marquee-item"><i></i>24 horas</div><div class="marquee-item"><i></i>experiência premium</div><div class="marquee-item"><i></i>reserva simples</div><div class="marquee-item"><i></i>comunidade ativa</div>
+    </div>
+  </div>
+
+  <section class="section shell" id="reservas">
+    <div class="section-head">
+      <div><span class="eyebrow">01 — Reservas</span><h2>Reserve sua quadra</h2></div>
+      <p>Valor por hora e por quadra, com referência de divisão por pessoa. Encontre um horário, convide seus parceiros e entre em quadra.</p>
+    </div>
+    <div class="price-grid">
+      {% if promoActive %}
+      <div class="price-card promo">
+        <span class="badge highlight">Inauguração • até {{ settings.promo_ends | shortdate }}</span>
+        <div class="price">R$ {{ settings.promo_price }} <span>/ hora / quadra</span></div>
+        <div class="per-person">Referência divulgada: R$ {{ settings.promo_per_person }} por pessoa.</div>
+      </div>
+      {% endif %}
+      <div class="price-card">
+        <span class="badge">Valor regular</span>
+        <div class="price">R$ {{ settings.regular_price }} <span>/ hora / quadra</span></div>
+        <div class="per-person">Referência divulgada: R$ {{ settings.regular_per_person }} por pessoa.</div>
+      </div>
+    </div>
+    <p class="section-note">Regras de cancelamento: {% if settings.cancel_policy %}{{ settings.cancel_policy }}{% else %}<span class="source-chip caution">[A CONFIRMAR]</span>{% endif %}</p>
+  </section>
+
+  <section class="section shell" id="equipamentos">
+    <div class="section-head">
+      <div><span class="eyebrow">02 — Equipamentos</span><h2>Locação de equipamentos</h2></div>
+      <p>Chegou sem raquete? Raquetes e bolas Adidas disponíveis para locação como complemento da reserva.</p>
+    </div>
+    <div class="equipment-grid">
+      {% for item in equipment %}
+      <div class="equipment-item">
+        <div class="bar"></div>
+        <h4>{{ item.name }}</h4>
+        <p>{{ item.description }}</p>
+        <strong>R$ {{ item.price }}</strong>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="section-note">Unidade de cobrança da locação: <span class="source-chip caution">[A CONFIRMAR]</span></p>
+  </section>
+
+  <section class="section shell" id="localizacao">
+    <div class="section-head">
+      <div><span class="eyebrow">03 — Localização</span><h2>Onde jogar</h2></div>
+      <p>No estacionamento do bolsão "A" do Aeroporto Internacional de Brasília — para quem vive na cidade e para quem está de passagem.</p>
+    </div>
+    <div class="guide-summary">
+      <div class="fact-card accent"><small>Local</small><strong>Aeroporto Internacional de Brasília</strong><p>Estacionamento do bolsão "A".</p></div>
+      <div class="fact-card highlight"><small>Funcionamento</small><strong>{{ settings.hours }}</strong><p>Jogue no horário que fizer sentido para você.</p></div>
+      <div class="fact-card"><small>Acesso</small><strong>Como chegar</strong><p>{% if settings.access_notes %}{{ settings.access_notes }}{% else %}Instruções de acesso e estacionamento [A CONFIRMAR].{% endif %}</p></div>
+      <div class="fact-card"><small>Atendimento</small><strong>WhatsApp</strong><p><a href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener">Fale com a equipe</a> para dúvidas sobre reservas e acesso.</p></div>
+    </div>
+  </section>
+
+  <section class="section shell" id="experiencia">
+    <div class="section-head">
+      <div><span class="eyebrow">04 — Experiência</span><h2>Mais que uma partida</h2></div>
+      <p>Estrutura pensada para quem joga e para quem acompanha — incluindo o Lounge VIP assinado pela Casa Érgo.</p>
+    </div>
+    {% if gallery.length %}
+    <div class="gallery-grid">
+      {% for item in gallery %}
+      <figure>
+        <img src="{{ item.image }}" alt="{{ item.caption }}">
+        <figcaption>{{ item.caption }}</figcaption>
+      </figure>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="section shell" id="parceiros">
+    <div class="section-head">
+      <div><span class="eyebrow">05 — Parceiros</span><h2>Quem constrói junto</h2></div>
+      <p>Marcas parceiras do Padel Experience, cada uma com função objetiva no projeto.</p>
+    </div>
+    <div class="partner-grid">
+      {% for partner in partners %}
+      <article class="partner-card{% if not partner.logo %} no-logo{% endif %}">
+        {% if partner.logo %}<img src="{{ partner.logo }}" alt="{{ partner.name }}">{% endif %}
+        <div class="partner-body">
+          <span class="partner-role">{{ partner.role }}</span>
+          <h4>{{ partner.name }}</h4>
+          <p>{{ partner.description }}</p>
+          <div class="partner-links">
+            {% if partner.instagram_url %}<a href="{{ partner.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+            {% if partner.announcement_url %}<a href="{{ partner.announcement_url }}" target="_blank" rel="noopener">Anúncio da parceria</a>{% endif %}
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    <p class="section-note">Quer sua marca aqui? <a href="mailto:{{ settings.email_parcerias }}">{{ settings.email_parcerias }}</a></p>
+  </section>
+
+  <section class="section shell">
+    <div class="cta">
+      <div><span class="eyebrow">Pronto para jogar?</span><h3>Sua próxima partida começa aqui.</h3><p>Encontre um horário, convide seus parceiros e reserve a quadra sem atrito.</p></div>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="{{ bookingUrl }}" target="_blank" rel="noopener">Reservar quadra
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="btn btn-outline" href="{{ settings.app_store }}" target="_blank" rel="noopener">App Store</a>
+        <a class="btn btn-outline" href="{{ settings.google_play }}" target="_blank" rel="noopener">Google Play</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+{% endblock %}

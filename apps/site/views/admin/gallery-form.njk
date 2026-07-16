@@ -1,0 +1,37 @@
+{% extends "layouts/admin.njk" %}
+{% block content %}
+
+<div class="admin-topbar">
+  <div>
+    <h1>{{ 'Editar imagem' if item else 'Nova imagem' }}</h1>
+    <p>Imagens exibidas na seção "Experiência" do site.</p>
+  </div>
+  <a class="btn btn-ghost btn-sm" href="/admin/galeria">Voltar</a>
+</div>
+
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+
+<form class="form-grid card" method="post" enctype="multipart/form-data"
+      action="{{ '/admin/galeria/' + item.id if item else '/admin/galeria' }}">
+  <input type="hidden" name="csrf" value="{{ csrfToken }}">
+  <div class="field">
+    <label for="image">Imagem</label>
+    {% if item %}<img class="form-thumb" src="{{ item.image }}" alt="Imagem atual">{% endif %}
+    <input class="input" type="file" id="image" name="image" accept="image/*" {{ '' if item else 'required' }}>
+  </div>
+  <div class="field">
+    <label for="caption">Legenda</label>
+    <input class="input" type="text" id="caption" name="caption" value="{{ item.caption if item }}">
+  </div>
+  <div class="field">
+    <label for="sort">Ordem</label>
+    <input class="input" type="number" id="sort" name="sort" value="{{ item.sort if item else 0 }}">
+    <small>A imagem de ordem mais baixa também aparece no painel do hero.</small>
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Salvar</button>
+    <a class="btn btn-ghost" href="/admin/galeria">Cancelar</a>
+  </div>
+</form>
+
+{% endblock %}

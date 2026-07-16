@@ -1,0 +1,25 @@
+{% extends "layouts/admin.njk" %}
+{% block content %}
+
+<div class="admin-topbar">
+  <div>
+    <h1>Configurações</h1>
+    <p>Links, preços e textos operacionais do site. Campos pendentes exibem [A CONFIRMAR] no público.</p>
+  </div>
+</div>
+
+<form class="form-grid card" method="post" action="/admin/configuracoes">
+  <input type="hidden" name="csrf" value="{{ csrfToken }}">
+  {% for field in fields %}
+  <div class="field">
+    <label for="{{ field.key }}">{{ field.label }}</label>
+    <input class="input" type="text" id="{{ field.key }}" name="{{ field.key }}" value="{{ values[field.key] }}">
+    {% if field.hint %}<small>{{ field.hint }}</small>{% endif %}
+  </div>
+  {% endfor %}
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Salvar configurações</button>
+  </div>
+</form>
+
+{% endblock %}

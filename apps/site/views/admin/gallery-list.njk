@@ -1,0 +1,30 @@
+{% extends "layouts/admin.njk" %}
+{% block content %}
+
+<div class="admin-topbar">
+  <div>
+    <h1>Galeria</h1>
+    <p>Imagens exibidas na seção "Experiência" e no painel do hero.</p>
+  </div>
+  <a class="btn btn-primary" href="/admin/galeria/novo">Nova imagem</a>
+</div>
+
+{% if items.length %}
+<div class="gallery-admin-grid">
+  {% for item in items %}
+  <div class="card gallery-admin-item">
+    <img src="{{ item.image }}" alt="{{ item.caption }}">
+    <p style="margin:0 0 4px;font-weight:650">{{ item.caption or 'Sem legenda' }}</p>
+    <p class="meta" style="margin:0 0 12px">Ordem {{ item.sort }}</p>
+    <div class="row-actions">
+      <a class="btn btn-ghost btn-sm" href="/admin/galeria/{{ item.id }}/editar">Editar</a>
+      <a class="btn btn-danger btn-sm" href="/admin/galeria/{{ item.id }}/excluir">Excluir</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty"><h3>Nenhuma imagem na galeria</h3><p>Adicione a primeira imagem.</p></div>
+{% endif %}
+
+{% endblock %}

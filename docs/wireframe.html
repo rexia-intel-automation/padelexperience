@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe lo-fi — Padel Experience (Brasília)</title>
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #e6e6e6;
+    color: #333;
+  }
+
+  /* ---------- sidebar nav ---------- */
+  .sidebar-nav {
+    position: fixed;
+    top: 0; left: 0;
+    width: 240px;
+    height: 100vh;
+    overflow-y: auto;
+    background: #222;
+    color: #eee;
+    padding: 18px 14px 40px;
+    z-index: 10;
+  }
+  .sidebar-nav h1 { font-size: 14px; margin: 0 0 2px; color: #fff; }
+  .sidebar-nav .subtitle { font-size: 10px; color: #999; margin-bottom: 6px; line-height: 1.4; }
+  .sidebar-nav .subtitle b { color: #ccc; }
+  .sidebar-nav .group-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+    color: #888; margin: 16px 0 6px; border-top: 1px solid #3a3a3a; padding-top: 12px;
+  }
+  .sidebar-nav .group-label:first-of-type { border-top: none; margin-top: 10px; }
+  .sidebar-nav nav a {
+    display: block; padding: 7px 9px; font-size: 12px; color: #ccc;
+    text-decoration: none; border-radius: 3px; margin-bottom: 2px;
+  }
+  .sidebar-nav nav a span.num {
+    display: inline-block; width: 16px; color: #777; font-size: 10px;
+  }
+  .sidebar-nav nav a:hover { background: #333; color: #fff; }
+  .sidebar-nav nav a.active { background: #555; color: #fff; font-weight: bold; }
+  .legend-box { margin-top: 18px; border-top: 1px solid #3a3a3a; padding-top: 12px; }
+  .legend-box .group-label { border-top: none; padding-top: 0; margin-top: 0; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 10px; color: #bbb; margin-bottom: 7px; }
+  .legend-swatch { flex-shrink: 0; }
+  .lg-img { width: 20px; height: 14px; border: 2px dashed #888; }
+  .lg-btn { width: 20px; height: 12px; background: #777; border-radius: 2px; }
+  .lg-line { width: 20px; height: 6px; background: #888; border-radius: 2px; }
+  .lg-postit { width: 16px; height: 12px; background: #fff8b0; border: 1px solid #cbb93a; }
+  .lg-cms { width: 24px; height: 12px; background: #111; border-radius: 6px; color: #fff; font-size: 7px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+  /* ---------- main content ---------- */
+  .main { margin-left: 240px; padding: 28px 34px 100px; }
+  .page-title { font-size: 20px; margin: 0 0 4px; color: #111; }
+  .page-sub { font-size: 12px; color: #666; margin: 0 0 28px; max-width: 760px; line-height: 1.5; }
+
+  .screen-section {
+    margin-bottom: 70px; padding-bottom: 44px; border-bottom: 1px dashed #b7b7b7;
+    scroll-margin-top: 20px;
+  }
+  .screen-section h2 { font-size: 17px; margin: 0 0 4px; color: #111; }
+  .screen-section .screen-desc { font-size: 11.5px; color: #666; margin: 0 0 16px; max-width: 820px; line-height: 1.5; }
+
+  .frames-row { display: flex; gap: 26px; align-items: flex-start; flex-wrap: wrap; }
+  .frame-wrap { display: flex; flex-direction: column; align-items: flex-start; }
+  .frame-label {
+    font-size: 10.5px; font-weight: bold; color: #555; margin-bottom: 7px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .frame-desktop, .frame-mobile {
+    background: #fff; border: 1px solid #999; position: relative;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.18); height: 680px; overflow: hidden;
+  }
+  .frame-desktop { width: 1100px; }
+  .frame-mobile { width: 380px; }
+  .frame-mobile.short, .frame-desktop.short { height: 560px; }
+
+  .browser-chrome {
+    height: 24px; background: #ddd; border-bottom: 1px solid #ccc;
+    display: flex; align-items: center; padding: 0 8px; gap: 6px; flex-shrink: 0;
+  }
+  .chrome-dot { width: 6px; height: 6px; border-radius: 50%; background: #b5b5b5; }
+  .chrome-url {
+    flex: 1; background: #f6f6f6; border: 1px solid #ccc; border-radius: 8px;
+    font-size: 9px; color: #777; padding: 2px 8px; margin-left: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .frame-scroll { height: calc(100% - 24px); overflow-y: auto; }
+
+  /* ---------- annotations ---------- */
+  .annot-col { display: flex; flex-direction: column; gap: 14px; max-width: 230px; padding-top: 30px; }
+  .postit {
+    background: #fff8b0; border: 1px solid #d9c94f; box-shadow: 2px 3px 5px rgba(0,0,0,0.18);
+    padding: 10px 12px; font-size: 10.5px; line-height: 1.45; color: #4a4320;
+    transform: rotate(-1.1deg);
+  }
+  .postit:nth-child(even) { transform: rotate(1deg); background: #fff3a0; }
+  .postit b { display: block; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; color: #2f2a10; }
+  .postit a { color: #2f2a10; }
+  .postit .url { word-break: break-all; font-family: monospace; font-size: 9px; display: block; margin-top: 3px; color: #33301a; }
+
+  /* ---------- generic wireframe primitives ---------- */
+  .tline { height: 8px; background: #d6d6d6; border-radius: 2px; margin-bottom: 6px; }
+  .tline.h { height: 13px; background: #a4a4a4; }
+  .tline.hh { height: 18px; background: #8f8f8f; }
+  .w100{width:100%}.w90{width:90%}.w85{width:85%}.w80{width:80%}.w75{width:75%}.w70{width:70%}
+  .w60{width:60%}.w50{width:50%}.w45{width:45%}.w40{width:40%}.w35{width:35%}.w30{width:30%}.w25{width:25%}.w20{width:20%}.w15{width:15%}
+
+  .btn {
+    display: inline-block; background: #666; color: #fff; font-size: 11px;
+    padding: 9px 16px; border-radius: 3px; text-align: center; white-space: nowrap;
+    text-decoration: none; border: 1px solid #666;
+  }
+  .btn.primary { background: #333; border-color: #333; }
+  .btn.outline { background: #fff; border: 1px solid #777; color: #333; }
+  .btn.sm { padding: 6px 11px; font-size: 10px; }
+  .btn.block { display: block; width: 100%; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .img-box {
+    border: 2px dashed #9a9a9a; background: #f2f2f2;
+    background-image:
+      linear-gradient(135deg, transparent 47%, #ccc 48%, #ccc 52%, transparent 53%),
+      linear-gradient(45deg, transparent 47%, #ccc 48%, #ccc 52%, transparent 53%);
+    display: flex; align-items: flex-end; justify-content: center;
+    color: #888; font-size: 10px; padding-bottom: 5px;
+  }
+  .img-box .img-label { background: rgba(255,255,255,0.88); padding: 1px 7px; border-radius: 2px; }
+
+  .cms-tag {
+    display: inline-block; background: #111; color: #fff; font-size: 8.5px; font-weight: 700;
+    letter-spacing: 0.5px; padding: 2px 7px; border-radius: 9px; vertical-align: middle; margin-left: 6px;
+  }
+
+  .logo-box {
+    width: 96px; height: 30px; border: 1px dashed #999; display: flex;
+    align-items: center; justify-content: center; font-size: 9px; color: #999; flex-shrink: 0;
+  }
+  .hamburger {
+    width: 24px; height: 18px; border: 1px solid #999; display: flex;
+    flex-direction: column; justify-content: space-between; padding: 4px 4px; box-sizing: border-box;
+  }
+  .hamburger span { display: block; height: 2px; background: #888; }
+
+  .header-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 22px; border-bottom: 1px solid #ccc; background: #fff;
+  }
+  .nav-inline { display: flex; gap: 14px; font-size: 10.5px; color: #666; }
+  .nav-inline span.active { color: #000; font-weight: bold; border-bottom: 2px solid #666; padding-bottom: 2px; }
+
+  .fab {
+    position: absolute; bottom: 14px; right: 14px; width: 42px; height: 42px; border-radius: 50%;
+    background: #4d4d4d; color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 7.5px; text-align: center; line-height: 1.1; box-shadow: 0 2px 5px rgba(0,0,0,0.35); z-index: 5;
+  }
+  .fab.mob { width: 36px; height: 36px; font-size: 7px; }
+
+  .footer { background: #ececec; border-top: 1px solid #ccc; padding: 20px 22px 14px; font-size: 10.5px; color: #555; }
+  .footer-cols { display: flex; gap: 36px; margin-bottom: 14px; flex-wrap: wrap; }
+  .footer-col h4 { font-size: 9.5px; text-transform: uppercase; color: #888; margin: 0 0 8px; letter-spacing: 0.5px; }
+  .social-row { display: flex; gap: 7px; margin-top: 6px; }
+  .social-icon {
+    width: 20px; height: 20px; border: 1px dashed #999; display: flex;
+    align-items: center; justify-content: center; font-size: 7.5px; color: #999;
+  }
+
+  .sec { padding: 20px 22px; }
+  .sec.tight { padding: 14px 16px; }
+  .sec.gray { background: #f5f5f5; }
+  .sec.dark { background: #ececec; }
+
+  .grid { display: grid; gap: 14px; }
+  .grid.c2 { grid-template-columns: repeat(2, 1fr); }
+  .grid.c3 { grid-template-columns: repeat(3, 1fr); }
+  .grid.c4 { grid-template-columns: repeat(4, 1fr); }
+
+  .card { border: 1px solid #ddd; background: #fff; padding: 10px; }
+
+  .input-box {
+    border: 1px solid #999; background: #fafafa; height: 32px; border-radius: 2px;
+  }
+  .input-box.ta { height: 70px; }
+  .field-label { font-size: 9.5px; color: #777; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  /* ---------- admin shell ---------- */
+  .admin-shell { display: flex; height: 100%; }
+  .admin-side { width: 180px; background: #262626; color: #ddd; padding: 14px 10px; flex-shrink: 0; }
+  .admin-side .logo-box { border-color: #666; color: #888; margin-bottom: 16px; width: 100%; }
+  .admin-side a {
+    display: block; font-size: 10.5px; color: #ccc; padding: 7px 9px; border-radius: 3px; margin-bottom: 2px; text-decoration: none;
+  }
+  .admin-side a.active { background: #454545; color: #fff; font-weight: bold; }
+  .admin-main { flex: 1; overflow-y: auto; height: 100%; }
+  .admin-topbar {
+    height: 42px; border-bottom: 1px solid #ddd; display: flex; align-items: center;
+    justify-content: space-between; padding: 0 16px; background: #fff;
+  }
+  .user-box {
+    width: 26px; height: 26px; border-radius: 50%; background: #ccc; display: flex;
+    align-items: center; justify-content: center; font-size: 8px; color: #666;
+  }
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+  table.tbl th, table.tbl td { border-bottom: 1px solid #e2e2e2; padding: 8px 6px; text-align: left; }
+  table.tbl th { color: #888; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .badge { padding: 2px 9px; border-radius: 9px; font-size: 9px; border: 1px solid #999; display: inline-block; }
+  .badge.pub { background: #222; color: #fff; border-color: #222; }
+  .badge.draft { background: #fff; color: #777; }
+  .toolbar-icon {
+    width: 24px; height: 20px; border: 1px solid #ccc; display: flex; align-items: center;
+    justify-content: center; font-size: 9px; color: #777; background: #fafafa;
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar-nav">
+  <h1>Padel Experience</h1>
+  <p class="subtitle">Wireframe lo-fi · site institucional<br><b>Brasília · reservas via app Matchpoint</b></p>
+
+  <div class="group-label">Site público</div>
+  <nav>
+    <a href="#scr-home"><span class="num">01</span>Home</a>
+    <a href="#scr-clube"><span class="num">02</span>O clube / estrutura</a>
+    <a href="#scr-noticias"><span class="num">03</span>Notícias</a>
+    <a href="#scr-parcerias"><span class="num">04</span>Parcerias</a>
+    <a href="#scr-contato"><span class="num">05</span>Contato</a>
+  </nav>
+
+  <div class="group-label">CMS / admin (desktop)</div>
+  <nav>
+    <a href="#scr-login"><span class="num">06</span>Login</a>
+    <a href="#scr-dashboard"><span class="num">07</span>Dashboard</a>
+    <a href="#scr-listagem"><span class="num">08</span>Listagem (coleção)</a>
+    <a href="#scr-edicao"><span class="num">09</span>Edição de item</a>
+    <a href="#scr-config"><span class="num">10</span>Configurações do site</a>
+  </nav>
+
+  <div class="legend-box">
+    <div class="group-label">Legenda</div>
+    <div class="legend-item"><span class="legend-swatch lg-img"></span> imagem (placeholder)</div>
+    <div class="legend-item"><span class="legend-swatch lg-btn"></span> botão / ação</div>
+    <div class="legend-item"><span class="legend-swatch lg-line"></span> texto (linha)</div>
+    <div class="legend-item"><span class="legend-swatch lg-cms">CMS</span> conteúdo dinâmico (editável no CMS)</div>
+    <div class="legend-item"><span class="legend-swatch" style="width:16px;height:12px;background:#fff8b0;border:1px solid #d9c94f;"></span> anotação (post-it)</div>
+  </div>
+</aside>
+
+<main class="main">
+  <h1 class="page-title">Wireframe lo-fi — site institucional Padel Experience</h1>
+  <p class="page-sub">
+    Somente estrutura e comportamento, sem identidade visual do cliente (tons de cinza, sem logo real).
+    Todo conteúdo marcado com a tag <span class="cms-tag">CMS</span> é editável pelo painel administrativo — o restante é fixo no template.
+    O agendamento de quadras acontece sempre no app white-label Matchpoint; o site apenas direciona para as lojas.
+    Use a navegação lateral para pular entre as 12 telas.
+  </p>
+
+  <!-- =========================================================
+       01 · HOME
+  ========================================================== -->
+  <section class="screen-section" id="scr-home">
+    <h2>01 · Home</h2>
+    <p class="screen-desc">Header fixo, hero com CTA duplo, faixa de destaques, próximos eventos (CMS), faixa de download do app, grupo VIP do WhatsApp e rodapé padrão. Botão flutuante do WhatsApp presente em todas as páginas públicas.</p>
+    <div class="frames-row">
+
+      <div class="frame-wrap">
+        <div class="frame-label">Desktop · 1100px</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">www.padelexperience.com.br</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar">
+              <div class="logo-box">LOGO</div>
+              <nav class="nav-inline">
+                <span class="active">Home</span><span>O clube</span><span>Aulas</span><span>Eventos</span><span>Notícias</span><span>Parcerias</span><span>Contato</span>
+              </nav>
+              <a class="btn primary sm">Baixar app</a>
+            </header>
+
+            <div class="sec">
+              <div class="img-box" style="height:230px;margin-bottom:14px;"><span class="img-label">IMG — banner hero</span><span class="cms-tag" style="position:absolute;top:10px;right:10px;">CMS</span></div>
+              <div style="position:relative;">
+                <div class="tline hh w60"></div>
+                <div class="tline w45" style="margin-bottom:16px;"></div>
+                <div class="btn-row">
+                  <a class="btn primary">Baixar app</a>
+                  <a class="btn outline">Falar no WhatsApp</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="sec gray">
+              <div class="grid c3">
+                <div class="card" style="text-align:center;"><div class="img-box" style="height:50px;width:50px;margin:0 auto 8px;"></div><div class="tline h w60" style="margin:0 auto 6px;"></div><div class="tline w80" style="margin:0 auto;"></div></div>
+                <div class="card" style="text-align:center;"><div class="img-box" style="height:50px;width:50px;margin:0 auto 8px;"></div><div class="tline h w60" style="margin:0 auto 6px;"></div><div class="tline w80" style="margin:0 auto;"></div></div>
+                <div class="card" style="text-align:center;"><div class="img-box" style="height:50px;width:50px;margin:0 auto 8px;"></div><div class="tline h w60" style="margin:0 auto 6px;"></div><div class="tline w80" style="margin:0 auto;"></div></div>
+              </div>
+              <div class="tline w20" style="margin-top:8px;text-align:center;height:0;"></div>
+            </div>
+
+            <div class="sec">
+              <div class="tline h w30">Próximos eventos</div>
+              <span class="cms-tag" style="margin-left:0;margin-bottom:10px;display:inline-block;">CMS</span>
+              <div class="grid c3" style="margin-top:10px;">
+                <div class="card"><div class="img-box" style="height:100px;margin-bottom:8px;"><span class="img-label">IMG</span></div><div class="tline w40"></div><div class="tline h w90"></div><div class="tline w70"></div><a class="btn sm outline" style="margin-top:6px;">Ver mais</a></div>
+                <div class="card"><div class="img-box" style="height:100px;margin-bottom:8px;"><span class="img-label">IMG</span></div><div class="tline w40"></div><div class="tline h w90"></div><div class="tline w70"></div><a class="btn sm outline" style="margin-top:6px;">Ver mais</a></div>
+                <div class="card"><div class="img-box" style="height:100px;margin-bottom:8px;"><span class="img-label">IMG</span></div><div class="tline w40"></div><div class="tline h w90"></div><div class="tline w70"></div><a class="btn sm outline" style="margin-top:6px;">Ver mais</a></div>
+              </div>
+            </div>
+
+            <div class="sec dark" style="text-align:center;">
+              <div class="tline h w30" style="margin:0 auto 8px;"></div>
+              <div class="tline w50" style="margin:0 auto 14px;"></div>
+              <div class="btn-row" style="justify-content:center;">
+                <div class="img-box" style="width:120px;height:38px;"><span class="img-label">App Store</span></div>
+                <div class="img-box" style="width:120px;height:38px;"><span class="img-label">Google Play</span></div>
+              </div>
+            </div>
+
+            <div class="sec" style="text-align:center;">
+              <div class="tline h w35" style="margin:0 auto 8px;"></div>
+              <div class="tline w55" style="margin:0 auto 14px;"></div>
+              <a class="btn primary">Entrar no canal VIP</a>
+            </div>
+
+            <footer class="footer">
+              <div class="footer-cols">
+                <div class="footer-col"><h4>Institucional</h4><div class="tline w60"></div><div class="tline w50"></div><div class="tline w70"></div></div>
+                <div class="footer-col"><h4>Contato</h4><div class="tline w80"></div><div class="tline w60"></div><div class="tline w70"></div></div>
+                <div class="footer-col"><h4>Redes sociais</h4><div class="social-row"><div class="social-icon">IG</div><div class="social-icon">FB</div><div class="social-icon">TT</div><div class="social-icon">WA</div></div></div>
+                <div class="footer-col" style="max-width:200px;"><h4>Endereço</h4><div class="tline w90"></div><div class="tline w70"></div></div>
+              </div>
+              <div class="tline w20" style="height:6px;"></div>
+            </footer>
+          </div>
+          <div class="fab">Whats<br>App</div>
+        </div>
+      </div>
+
+      <div class="frame-wrap">
+        <div class="frame-label">Mobile · 380px</div>
+        <div class="frame-mobile">
+          <div class="browser-chrome"><span class="chrome-dot"></span><div class="chrome-url">padelexperience.com.br</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar">
+              <div class="logo-box" style="width:64px;height:24px;">LOGO</div>
+              <div class="hamburger"><span></span><span></span><span></span></div>
+            </header>
+            <div class="sec tight">
+              <div class="img-box" style="height:130px;margin-bottom:10px;"><span class="img-label">IMG hero</span><span class="cms-tag" style="position:absolute;top:8px;right:8px;">CMS</span></div>
+              <div style="position:relative;">
+                <div class="tline hh w90"></div>
+                <div class="tline w70" style="margin-bottom:12px;"></div>
+                <a class="btn primary block" style="margin-bottom:8px;">Baixar app</a>
+                <a class="btn outline block">Falar no WhatsApp</a>
+              </div>
+            </div>
+            <div class="sec tight gray">
+              <div class="grid c3" style="gap:8px;">
+                <div style="text-align:center;"><div class="img-box" style="height:34px;width:34px;margin:0 auto 4px;"></div><div class="tline w80" style="margin:0 auto;"></div></div>
+                <div style="text-align:center;"><div class="img-box" style="height:34px;width:34px;margin:0 auto 4px;"></div><div class="tline w80" style="margin:0 auto;"></div></div>
+                <div style="text-align:center;"><div class="img-box" style="height:34px;width:34px;margin:0 auto 4px;"></div><div class="tline w80" style="margin:0 auto;"></div></div>
+              </div>
+            </div>
+            <div class="sec tight">
+              <div class="tline h w50">Próximos eventos</div><span class="cms-tag">CMS</span>
+              <div style="margin-top:8px;">
+                <div class="card" style="margin-bottom:8px;"><div class="img-box" style="height:70px;margin-bottom:6px;"><span class="img-label">IMG</span></div><div class="tline w40"></div><div class="tline h w90"></div></div>
+                <div class="card" style="margin-bottom:8px;"><div class="img-box" style="height:70px;margin-bottom:6px;"><span class="img-label">IMG</span></div><div class="tline w40"></div><div class="tline h w90"></div></div>
+              </div>
+            </div>
+            <div class="sec tight dark" style="text-align:center;">
+              <div class="tline h w60" style="margin:0 auto 8px;"></div>
+              <div class="img-box" style="width:110px;height:34px;margin:0 auto 6px;"><span class="img-label">App Store</span></div>
+              <div class="img-box" style="width:110px;height:34px;margin:0 auto;"><span class="img-label">Google Play</span></div>
+            </div>
+            <div class="sec tight" style="text-align:center;">
+              <div class="tline h w70" style="margin:0 auto 8px;"></div>
+              <a class="btn primary block">Entrar no canal VIP</a>
+            </div>
+            <footer class="footer">
+              <div class="tline w60"></div><div class="tline w50"></div>
+              <div class="social-row" style="margin:10px 0;"><div class="social-icon">IG</div><div class="social-icon">FB</div><div class="social-icon">WA</div></div>
+              <div class="tline w80"></div>
+            </footer>
+          </div>
+          <div class="fab mob">Wpp</div>
+        </div>
+      </div>
+
+      <div class="annot-col">
+        <div class="postit"><b>CMS</b>Banner do hero e cards de "próximos eventos" vêm dos módulos Banners da home e Eventos. Editor troca imagem/headline sem deploy.</div>
+        <div class="postit"><b>CTA duplo</b>"Baixar app" leva às lojas (App Store / Google Play). "Falar no WhatsApp" abre o atendimento.<span class="url">apps.apple.com/br/app/padel-experience-br/id6780433030</span><span class="url">play.google.com/store/apps/details?id=es.tpc.matchpoint.appclient.padelexperiencebr</span></div>
+        <div class="postit"><b>Canal VIP</b>Botão linka direto para o canal de WhatsApp.<span class="url">whatsapp.com/channel/0029VbBqbSQGJP8ETgstVM29</span></div>
+        <div class="postit"><b>Flutuante</b>Bolha do WhatsApp é fixa na viewport em todas as páginas públicas (aqui ancorada no canto do frame).<span class="url">api.whatsapp.com/send/?phone=556192927630</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       02 · O CLUBE / ESTRUTURA
+  ========================================================== -->
+  <section class="screen-section" id="scr-clube">
+    <h2>02 · O clube / estrutura</h2>
+    <p class="screen-desc">Galeria de fotos (CMS), lista de comodidades, horários de funcionamento (CMS) e mapa/endereço.</p>
+    <div class="frames-row">
+
+      <div class="frame-wrap">
+        <div class="frame-label">Desktop · 1100px</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">www.padelexperience.com.br/o-clube</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar">
+              <div class="logo-box">LOGO</div>
+              <nav class="nav-inline"><span>Home</span><span class="active">O clube</span><span>Aulas</span><span>Eventos</span><span>Notícias</span><span>Parcerias</span><span>Contato</span></nav>
+              <a class="btn primary sm">Baixar app</a>
+            </header>
+            <div class="sec">
+              <div class="tline hh w30">Estrutura</div><span class="cms-tag">CMS galeria</span>
+              <div class="grid c4" style="margin-top:12px;">
+                <div class="img-box" style="height:110px;"><span class="img-label">IMG</span></div>
+                <div class="img-box" style="height:110px;"><span class="img-label">IMG</span></div>
+                <div class="img-box" style="height:110px;"><span class="img-label">IMG</span></div>
+                <div class="img-box" style="height:110px;"><span class="img-label">IMG</span></div>
+                <div class="img-box" style="height:110px;"><span class="img-label">IMG</span></div>
+                <div class="img-box" style="height:110px;"><span class="img-label">IMG</span></div>
+                <div class="img-box" style="height:110px;"><span class="img-label">IMG</span></div>
+                <div class="img-box" style="height:110px;"><span class="img-label">IMG</span></div>
+              </div>
+            </div>
+            <div class="sec gray">
+              <div class="tline h w30" style="margin-bottom:10px;">Comodidades</div>
+              <div class="grid c3">
+                <div class="tline w70"></div><div class="tline w60"></div><div class="tline w65"></div>
+                <div class="tline w55"></div><div class="tline w75"></div><div class="tline w50"></div>
+              </div>
+            </div>
+            <div class="sec">
+              <div class="tline h w35" style="margin-bottom:10px;">Horários de funcionamento</div><span class="cms-tag">CMS</span>
+              <div class="grid c2" style="margin-top:10px;max-width:520px;">
+                <div class="tline w60"></div><div class="tline w40"></div>
+                <div class="tline w60"></div><div class="tline w40"></div>
+                <div class="tline w60"></div><div class="tline w40"></div>
+              </div>
+            </div>
+            <div class="sec gray">
+              <div class="grid c2">
+                <div class="img-box" style="height:160px;"><span class="img-label">MAPA (embed estático)</span></div>
+                <div><div class="tline h w60"></div><div class="tline w80"></div><div class="tline w70"></div><div class="tline w50"></div></div>
+              </div>
+            </div>
+            <footer class="footer">
+              <div class="footer-cols">
+                <div class="footer-col"><h4>Institucional</h4><div class="tline w60"></div><div class="tline w50"></div></div>
+                <div class="footer-col"><h4>Contato</h4><div class="tline w80"></div></div>
+                <div class="footer-col"><h4>Redes sociais</h4><div class="social-row"><div class="social-icon">IG</div><div class="social-icon">FB</div></div></div>
+              </div>
+            </footer>
+          </div>
+          <div class="fab">Whats<br>App</div>
+        </div>
+      </div>
+
+      <div class="frame-wrap">
+        <div class="frame-label">Mobile · 380px</div>
+        <div class="frame-mobile">
+          <div class="browser-chrome"><span class="chrome-dot"></span><div class="chrome-url">padelexperience.com.br/o-clube</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar"><div class="logo-box" style="width:64px;height:24px;">LOGO</div><div class="hamburger"><span></span><span></span><span></span></div></header>
+            <div class="sec tight">
+              <div class="tline h w50">Estrutura</div><span class="cms-tag">CMS</span>
+              <div class="grid c2" style="margin-top:10px;">
+                <div class="img-box" style="height:80px;"><span class="img-label">IMG</span></div>
+                <div class="img-box" style="height:80px;"><span class="img-label">IMG</span></div>
+                <div class="img-box" style="height:80px;"><span class="img-label">IMG</span></div>
+                <div class="img-box" style="height:80px;"><span class="img-label">IMG</span></div>
+              </div>
+            </div>
+            <div class="sec tight gray">
+              <div class="tline h w60" style="margin-bottom:8px;">Comodidades</div>
+              <div class="tline w70"></div><div class="tline w60"></div><div class="tline w65"></div><div class="tline w55"></div>
+            </div>
+            <div class="sec tight">
+              <div class="tline h w70">Horários</div><span class="cms-tag">CMS</span>
+              <div class="tline w60" style="margin-top:8px;"></div><div class="tline w60"></div><div class="tline w60"></div>
+            </div>
+            <div class="sec tight gray">
+              <div class="img-box" style="height:110px;margin-bottom:8px;"><span class="img-label">MAPA</span></div>
+              <div class="tline w80"></div><div class="tline w60"></div>
+            </div>
+            <footer class="footer"><div class="tline w60"></div><div class="tline w50"></div></footer>
+          </div>
+          <div class="fab mob">Wpp</div>
+        </div>
+      </div>
+
+      <div class="annot-col">
+        <div class="postit"><b>CMS</b>Galeria de fotos é uma lista de imagens gerenciada no CMS (arrastar para reordenar, upload novo).</div>
+        <div class="postit"><b>CMS</b>Horários de funcionamento vêm de Configurações do site &gt; Horários — reaproveitados também na página Contato.</div>
+        <div class="postit"><b>Estático</b>Lista de comodidades e o mapa são conteúdo fixo do template (não editável via CMS nesta primeira versão).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       03 · AULAS & EXPERIÊNCIAS
+  ========================================================== -->
+  <section class="screen-section" id="scr-aulas">
+    <h2>03 · Aulas &amp; experiências</h2>
+    <p class="screen-desc">Apresentação, cards de professores/modalidades (CMS) e CTA para agendar aula via WhatsApp.</p>
+    <div class="frames-row">
+
+      <div class="frame-wrap">
+        <div class="frame-label">Desktop · 1100px</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">www.padelexperience.com.br/aulas</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar">
+              <div class="logo-box">LOGO</div>
+              <nav class="nav-inline"><span>Home</span><span>O clube</span><span class="active">Aulas</span><span>Eventos</span><span>Notícias</span><span>Parcerias</span><span>Contato</span></nav>
+              <a class="btn primary sm">Baixar app</a>
+            </header>
+            <div class="sec" style="text-align:center;">
+              <div class="tline hh w30" style="margin:0 auto 8px;"></div>
+              <div class="tline w60" style="margin:0 auto;"></div>
+              <div class="tline w50" style="margin:0 auto;"></div>
+            </div>
+            <div class="sec gray">
+              <div class="tline h w35" style="margin-bottom:10px;">Professores &amp; modalidades</div><span class="cms-tag">CMS</span>
+              <div class="grid c3" style="margin-top:10px;">
+                <div class="card" style="text-align:center;"><div class="img-box" style="height:110px;width:110px;margin:0 auto 8px;"><span class="img-label">FOTO</span></div><div class="tline h w70" style="margin:0 auto 4px;"></div><div class="tline w50" style="margin:0 auto 6px;"></div><div class="tline w85" style="margin:0 auto;"></div></div>
+                <div class="card" style="text-align:center;"><div class="img-box" style="height:110px;width:110px;margin:0 auto 8px;"><span class="img-label">FOTO</span></div><div class="tline h w70" style="margin:0 auto 4px;"></div><div class="tline w50" style="margin:0 auto 6px;"></div><div class="tline w85" style="margin:0 auto;"></div></div>
+                <div class="card" style="text-align:center;"><div class="img-box" style="height:110px;width:110px;margin:0 auto 8px;"><span class="img-label">FOTO</span></div><div class="tline h w70" style="margin:0 auto 4px;"></div><div class="tline w50" style="margin:0 auto 6px;"></div><div class="tline w85" style="margin:0 auto;"></div></div>
+              </div>
+            </div>
+            <div class="sec" style="text-align:center;">
+              <div class="tline h w40" style="margin:0 auto 8px;"></div>
+              <div class="tline w55" style="margin:0 auto 14px;"></div>
+              <a class="btn primary">Agendar aula no WhatsApp</a>
+            </div>
+            <footer class="footer">
+              <div class="footer-cols">
+                <div class="footer-col"><h4>Institucional</h4><div class="tline w60"></div></div>
+                <div class="footer-col"><h4>Contato</h4><div class="tline w80"></div></div>
+                <div class="footer-col"><h4>Redes sociais</h4><div class="social-row"><div class="social-icon">IG</div><div class="social-icon">FB</div></div></div>
+              </div>
+            </footer>
+          </div>
+          <div class="fab">Whats<br>App</div>
+        </div>
+      </div>
+
+      <div class="frame-wrap">
+        <div class="frame-label">Mobile · 380px</div>
+        <div class="frame-mobile">
+          <div class="browser-chrome"><span class="chrome-dot"></span><div class="chrome-url">padelexperience.com.br/aulas</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar"><div class="logo-box" style="width:64px;height:24px;">LOGO</div><div class="hamburger"><span></span><span></span><span></span></div></header>
+            <div class="sec tight" style="text-align:center;"><div class="tline hh w70" style="margin:0 auto 8px;"></div><div class="tline w80" style="margin:0 auto;"></div></div>
+            <div class="sec tight gray">
+              <div class="tline h w60">Professores</div><span class="cms-tag">CMS</span>
+              <div class="card" style="text-align:center;margin-top:10px;"><div class="img-box" style="height:80px;width:80px;margin:0 auto 6px;"><span class="img-label">FOTO</span></div><div class="tline h w60" style="margin:0 auto 4px;"></div><div class="tline w80" style="margin:0 auto;"></div></div>
+              <div class="card" style="text-align:center;margin-top:10px;"><div class="img-box" style="height:80px;width:80px;margin:0 auto 6px;"><span class="img-label">FOTO</span></div><div class="tline h w60" style="margin:0 auto 4px;"></div><div class="tline w80" style="margin:0 auto;"></div></div>
+            </div>
+            <div class="sec tight" style="text-align:center;">
+              <div class="tline h w80" style="margin:0 auto 10px;"></div>
+              <a class="btn primary block">Agendar aula no WhatsApp</a>
+            </div>
+            <footer class="footer"><div class="tline w60"></div></footer>
+          </div>
+          <div class="fab mob">Wpp</div>
+        </div>
+      </div>
+
+      <div class="annot-col">
+        <div class="postit"><b>CMS</b>Cada card (professor ou modalidade) é um item da coleção "Aulas". Campos: foto, nome, especialidade, descrição curta.</div>
+        <div class="postit"><b>CTA</b>Botão abre WhatsApp de atendimento com mensagem pré-preenchida sugerindo agendamento de aula.<span class="url">api.whatsapp.com/send/?phone=556192927630</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       04 · EVENTOS & TORNEIOS
+  ========================================================== -->
+  <section class="screen-section" id="scr-eventos">
+    <h2>04 · Eventos &amp; torneios</h2>
+    <p class="screen-desc">Listagem de eventos (CMS) com filtro próximos/realizados; cada card com data, imagem, descrição e CTA de inscrição.</p>
+    <div class="frames-row">
+
+      <div class="frame-wrap">
+        <div class="frame-label">Desktop · 1100px</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">www.padelexperience.com.br/eventos</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar">
+              <div class="logo-box">LOGO</div>
+              <nav class="nav-inline"><span>Home</span><span>O clube</span><span>Aulas</span><span class="active">Eventos</span><span>Notícias</span><span>Parcerias</span><span>Contato</span></nav>
+              <a class="btn primary sm">Baixar app</a>
+            </header>
+            <div class="sec">
+              <div class="tline hh w30">Eventos &amp; torneios</div><span class="cms-tag">CMS</span>
+              <div class="btn-row" style="margin-top:12px;">
+                <a class="btn sm primary">Próximos</a>
+                <a class="btn sm outline">Realizados</a>
+              </div>
+              <div class="grid c3" style="margin-top:14px;">
+                <div class="card"><div class="img-box" style="height:110px;margin-bottom:8px;"><span class="img-label">IMG</span></div><div class="tline w40"></div><div class="tline h w90"></div><div class="tline w80"></div><div class="tline w60"></div><a class="btn sm" style="margin-top:6px;">Inscrever-se</a></div>
+                <div class="card"><div class="img-box" style="height:110px;margin-bottom:8px;"><span class="img-label">IMG</span></div><div class="tline w40"></div><div class="tline h w90"></div><div class="tline w80"></div><div class="tline w60"></div><a class="btn sm" style="margin-top:6px;">Inscrever-se</a></div>
+                <div class="card"><div class="img-box" style="height:110px;margin-bottom:8px;"><span class="img-label">IMG</span></div><div class="tline w40"></div><div class="tline h w90"></div><div class="tline w80"></div><div class="tline w60"></div><a class="btn sm" style="margin-top:6px;">Inscrever-se</a></div>
+                <div class="card"><div class="img-box" style="height:110px;margin-bottom:8px;"><span class="img-label">IMG</span></div><div class="tline w40"></div><div class="tline h w90"></div><div class="tline w80"></div><div class="tline w60"></div><a class="btn sm" style="margin-top:6px;">Inscrever-se</a></div>
+                <div class="card"><div class="img-box" style="height:110px;margin-bottom:8px;"><span class="img-label">IMG</span></div><div class="tline w40"></div><div class="tline h w90"></div><div class="tline w80"></div><div class="tline w60"></div><a class="btn sm" style="margin-top:6px;">Inscrever-se</a></div>
+                <div class="card"><div class="img-box" style="height:110px;margin-bottom:8px;"><span class="img-label">IMG</span></div><div class="tline w40"></div><div class="tline h w90"></div><div class="tline w80"></div><div class="tline w60"></div><a class="btn sm" style="margin-top:6px;">Inscrever-se</a></div>
+              </div>
+            </div>
+            <footer class="footer">
+              <div class="footer-cols">
+                <div class="footer-col"><h4>Institucional</h4><div class="tline w60"></div></div>
+                <div class="footer-col"><h4>Contato</h4><div class="tline w80"></div></div>
+              </div>
+            </footer>
+          </div>
+          <div class="fab">Whats<br>App</div>
+        </div>
+      </div>
+
+      <div class="frame-wrap">
+        <div class="frame-label">Mobile · 380px</div>
+        <div class="frame-mobile">
+          <div class="browser-chrome"><span class="chrome-dot"></span><div class="chrome-url">padelexperience.com.br/eventos</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar"><div class="logo-box" style="width:64px;height:24px;">LOGO</div><div class="hamburger"><span></span><span></span><span></span></div></header>
+            <div class="sec tight">
+              <div class="tline h w60">Eventos</div><span class="cms-tag">CMS</span>
+              <div class="btn-row" style="margin-top:8px;"><a class="btn sm primary">Próximos</a><a class="btn sm outline">Realizados</a></div>
+              <div class="card" style="margin-top:10px;"><div class="img-box" style="height:80px;margin-bottom:6px;"><span class="img-label">IMG</span></div><div class="tline w40"></div><div class="tline h w90"></div><a class="btn sm" style="margin-top:6px;">Inscrever-se</a></div>
+              <div class="card" style="margin-top:10px;"><div class="img-box" style="height:80px;margin-bottom:6px;"><span class="img-label">IMG</span></div><div class="tline w40"></div><div class="tline h w90"></div><a class="btn sm" style="margin-top:6px;">Inscrever-se</a></div>
+            </div>
+            <footer class="footer"><div class="tline w60"></div></footer>
+          </div>
+          <div class="fab mob">Wpp</div>
+        </div>
+      </div>
+
+      <div class="annot-col">
+        <div class="postit"><b>CMS</b>Coleção "Eventos": título, data, imagem de capa, descrição, status (próximo/realizado), link de inscrição.</div>
+        <div class="postit"><b>Filtro</b>Toggle "Próximos / Realizados" filtra a listagem no cliente, sem recarregar a página.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       05 · NOTÍCIAS
+  ========================================================== -->
+  <section class="screen-section" id="scr-noticias">
+    <h2>05 · Notícias</h2>
+    <p class="screen-desc">Grid de posts (CMS) e página de post individual (título, capa, corpo, compartilhar).</p>
+
+    <div class="frame-label" style="margin-top:4px;">5a · Grid de notícias</div>
+    <div class="frames-row" style="margin-bottom:26px;">
+      <div class="frame-wrap">
+        <div class="frame-label">Desktop · 1100px</div>
+        <div class="frame-desktop short">
+          <div class="browser-chrome"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">www.padelexperience.com.br/noticias</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar">
+              <div class="logo-box">LOGO</div>
+              <nav class="nav-inline"><span>Home</span><span>O clube</span><span>Aulas</span><span>Eventos</span><span class="active">Notícias</span><span>Parcerias</span><span>Contato</span></nav>
+              <a class="btn primary sm">Baixar app</a>
+            </header>
+            <div class="sec">
+              <div class="tline hh w25">Notícias</div><span class="cms-tag">CMS</span>
+              <div class="grid c3" style="margin-top:12px;">
+                <div class="card"><div class="img-box" style="height:100px;margin-bottom:8px;"><span class="img-label">IMG</span></div><div class="tline w30"></div><div class="tline h w90"></div><div class="tline w80"></div></div>
+                <div class="card"><div class="img-box" style="height:100px;margin-bottom:8px;"><span class="img-label">IMG</span></div><div class="tline w30"></div><div class="tline h w90"></div><div class="tline w80"></div></div>
+                <div class="card"><div class="img-box" style="height:100px;margin-bottom:8px;"><span class="img-label">IMG</span></div><div class="tline w30"></div><div class="tline h w90"></div><div class="tline w80"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="frame-wrap">
+        <div class="frame-label">Mobile · 380px</div>
+        <div class="frame-mobile short">
+          <div class="browser-chrome"><span class="chrome-dot"></span><div class="chrome-url">padelexperience.com.br/noticias</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar"><div class="logo-box" style="width:64px;height:24px;">LOGO</div><div class="hamburger"><span></span><span></span><span></span></div></header>
+            <div class="sec tight">
+              <div class="tline h w50">Notícias</div><span class="cms-tag">CMS</span>
+              <div class="card" style="margin-top:10px;"><div class="img-box" style="height:80px;margin-bottom:6px;"><span class="img-label">IMG</span></div><div class="tline w30"></div><div class="tline h w90"></div></div>
+              <div class="card" style="margin-top:10px;"><div class="img-box" style="height:80px;margin-bottom:6px;"><span class="img-label">IMG</span></div><div class="tline w30"></div><div class="tline h w90"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annot-col" style="padding-top:0;">
+        <div class="postit"><b>CMS</b>Grid lista os posts publicados, ordenados por data. Cada card puxa capa, título e resumo.</div>
+      </div>
+    </div>
+
+    <div class="frame-label">5b · Post individual</div>
+    <div class="frames-row">
+      <div class="frame-wrap">
+        <div class="frame-label">Desktop · 1100px</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">www.padelexperience.com.br/noticias/titulo-do-post</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar">
+              <div class="logo-box">LOGO</div>
+              <nav class="nav-inline"><span>Home</span><span>O clube</span><span>Aulas</span><span>Eventos</span><span class="active">Notícias</span><span>Parcerias</span><span>Contato</span></nav>
+              <a class="btn primary sm">Baixar app</a>
+            </header>
+            <div class="sec">
+              <div class="img-box" style="height:200px;margin-bottom:14px;"><span class="img-label">IMG — capa do post</span><span class="cms-tag" style="position:absolute;top:10px;right:10px;">CMS</span></div>
+              <div class="tline hh w60"></div>
+              <div class="tline w30" style="margin-bottom:14px;"></div>
+              <div class="tline w100"></div><div class="tline w95"></div><div class="tline w90"></div><div class="tline w80"></div><div class="tline w95"></div><div class="tline w70"></div>
+              <div class="btn-row" style="margin-top:14px;">
+                <div class="tline w15" style="display:none;"></div>
+                <div class="social-icon" style="width:26px;height:26px;">IG</div><div class="social-icon" style="width:26px;height:26px;">FB</div><div class="social-icon" style="width:26px;height:26px;">WA</div>
+              </div>
+            </div>
+            <footer class="footer"><div class="tline w60"></div></footer>
+          </div>
+          <div class="fab">Whats<br>App</div>
+        </div>
+      </div>
+      <div class="frame-wrap">
+        <div class="frame-label">Mobile · 380px</div>
+        <div class="frame-mobile">
+          <div class="browser-chrome"><span class="chrome-dot"></span><div class="chrome-url">.../noticias/titulo-do-post</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar"><div class="logo-box" style="width:64px;height:24px;">LOGO</div><div class="hamburger"><span></span><span></span><span></span></div></header>
+            <div class="sec tight">
+              <div class="img-box" style="height:130px;margin-bottom:10px;"><span class="img-label">IMG capa</span><span class="cms-tag" style="position:absolute;top:8px;right:8px;">CMS</span></div>
+              <div class="tline hh w90"></div>
+              <div class="tline w40" style="margin-bottom:10px;"></div>
+              <div class="tline w100"></div><div class="tline w95"></div><div class="tline w85"></div><div class="tline w90"></div>
+              <div class="social-row" style="margin-top:10px;"><div class="social-icon">IG</div><div class="social-icon">FB</div><div class="social-icon">WA</div></div>
+            </div>
+            <footer class="footer"><div class="tline w60"></div></footer>
+          </div>
+          <div class="fab mob">Wpp</div>
+        </div>
+      </div>
+      <div class="annot-col">
+        <div class="postit"><b>CMS</b>Título, capa, corpo (rich text) e data vêm da coleção Notícias. Corpo aceita texto formatado, links e imagens.</div>
+        <div class="postit"><b>Compartilhar</b>Ícones geram link direto para Instagram/Facebook/WhatsApp com a URL do post.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       06 · PARCERIAS
+  ========================================================== -->
+  <section class="screen-section" id="scr-parcerias">
+    <h2>06 · Parcerias</h2>
+    <p class="screen-desc">Pitch curto, benefícios e CTA via e-mail de parcerias.</p>
+    <div class="frames-row">
+
+      <div class="frame-wrap">
+        <div class="frame-label">Desktop · 1100px</div>
+        <div class="frame-desktop short">
+          <div class="browser-chrome"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">www.padelexperience.com.br/parcerias</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar">
+              <div class="logo-box">LOGO</div>
+              <nav class="nav-inline"><span>Home</span><span>O clube</span><span>Aulas</span><span>Eventos</span><span>Notícias</span><span class="active">Parcerias</span><span>Contato</span></nav>
+              <a class="btn primary sm">Baixar app</a>
+            </header>
+            <div class="sec" style="text-align:center;">
+              <div class="tline hh w30" style="margin:0 auto 8px;"></div>
+              <div class="tline w55" style="margin:0 auto;"></div>
+              <div class="tline w45" style="margin:0 auto;"></div>
+            </div>
+            <div class="sec gray">
+              <div class="grid c3">
+                <div style="text-align:center;"><div class="img-box" style="height:40px;width:40px;margin:0 auto 8px;"></div><div class="tline w70" style="margin:0 auto;"></div></div>
+                <div style="text-align:center;"><div class="img-box" style="height:40px;width:40px;margin:0 auto 8px;"></div><div class="tline w70" style="margin:0 auto;"></div></div>
+                <div style="text-align:center;"><div class="img-box" style="height:40px;width:40px;margin:0 auto 8px;"></div><div class="tline w70" style="margin:0 auto;"></div></div>
+              </div>
+            </div>
+            <div class="sec" style="text-align:center;">
+              <a class="btn primary">Falar com parcerias</a>
+            </div>
+            <footer class="footer"><div class="tline w60"></div></footer>
+          </div>
+          <div class="fab">Whats<br>App</div>
+        </div>
+      </div>
+
+      <div class="frame-wrap">
+        <div class="frame-label">Mobile · 380px</div>
+        <div class="frame-mobile short">
+          <div class="browser-chrome"><span class="chrome-dot"></span><div class="chrome-url">padelexperience.com.br/parcerias</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar"><div class="logo-box" style="width:64px;height:24px;">LOGO</div><div class="hamburger"><span></span><span></span><span></span></div></header>
+            <div class="sec tight" style="text-align:center;"><div class="tline hh w70" style="margin:0 auto 8px;"></div><div class="tline w80" style="margin:0 auto;"></div></div>
+            <div class="sec tight gray">
+              <div class="tline w70"></div><div class="tline w60"></div><div class="tline w65"></div>
+            </div>
+            <div class="sec tight" style="text-align:center;"><a class="btn primary block">Falar com parcerias</a></div>
+            <footer class="footer"><div class="tline w60"></div></footer>
+          </div>
+          <div class="fab mob">Wpp</div>
+        </div>
+      </div>
+
+      <div class="annot-col">
+        <div class="postit"><b>CTA</b>Botão abre cliente de e-mail (mailto) com o endereço de parcerias.<span class="url">mailto:parcerias@padelexperience.com.br</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       07 · CONTATO
+  ========================================================== -->
+  <section class="screen-section" id="scr-contato">
+    <h2>07 · Contato</h2>
+    <p class="screen-desc">WhatsApp de atendimento, endereço + mapa, horários e formulário simples (nome, e-mail, mensagem).</p>
+    <div class="frames-row">
+
+      <div class="frame-wrap">
+        <div class="frame-label">Desktop · 1100px</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">www.padelexperience.com.br/contato</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar">
+              <div class="logo-box">LOGO</div>
+              <nav class="nav-inline"><span>Home</span><span>O clube</span><span>Aulas</span><span>Eventos</span><span>Notícias</span><span>Parcerias</span><span class="active">Contato</span></nav>
+              <a class="btn primary sm">Baixar app</a>
+            </header>
+            <div class="sec" style="text-align:center;">
+              <div class="tline hh w25" style="margin:0 auto 8px;"></div>
+              <a class="btn primary">Chamar no WhatsApp</a>
+            </div>
+            <div class="sec gray">
+              <div class="grid c2">
+                <div class="img-box" style="height:150px;"><span class="img-label">MAPA</span></div>
+                <div>
+                  <div class="tline h w50"></div><div class="tline w80"></div><div class="tline w60"></div>
+                  <div class="tline h w40" style="margin-top:12px;"></div><span class="cms-tag">CMS</span>
+                  <div class="tline w50" style="margin-top:6px;"></div><div class="tline w50"></div>
+                </div>
+              </div>
+            </div>
+            <div class="sec">
+              <div class="tline h w30" style="margin-bottom:12px;">Fale conosco</div>
+              <div class="grid c2" style="max-width:600px;">
+                <div><div class="field-label">Nome</div><div class="input-box"></div></div>
+                <div><div class="field-label">E-mail</div><div class="input-box"></div></div>
+              </div>
+              <div style="max-width:600px;margin-top:10px;"><div class="field-label">Mensagem</div><div class="input-box ta"></div></div>
+              <a class="btn primary" style="margin-top:12px;">Enviar</a>
+            </div>
+            <footer class="footer"><div class="tline w60"></div></footer>
+          </div>
+          <div class="fab">Whats<br>App</div>
+        </div>
+      </div>
+
+      <div class="frame-wrap">
+        <div class="frame-label">Mobile · 380px</div>
+        <div class="frame-mobile">
+          <div class="browser-chrome"><span class="chrome-dot"></span><div class="chrome-url">padelexperience.com.br/contato</div></div>
+          <div class="frame-scroll">
+            <header class="header-bar"><div class="logo-box" style="width:64px;height:24px;">LOGO</div><div class="hamburger"><span></span><span></span><span></span></div></header>
+            <div class="sec tight" style="text-align:center;"><div class="tline hh w60" style="margin:0 auto 8px;"></div><a class="btn primary block">Chamar no WhatsApp</a></div>
+            <div class="sec tight gray">
+              <div class="img-box" style="height:110px;margin-bottom:8px;"><span class="img-label">MAPA</span></div>
+              <div class="tline w80"></div><div class="tline w60"></div>
+              <div class="tline h w50" style="margin-top:8px;"></div><span class="cms-tag">CMS</span>
+            </div>
+            <div class="sec tight">
+              <div class="tline h w60" style="margin-bottom:8px;">Fale conosco</div>
+              <div class="field-label">Nome</div><div class="input-box" style="margin-bottom:8px;"></div>
+              <div class="field-label">E-mail</div><div class="input-box" style="margin-bottom:8px;"></div>
+              <div class="field-label">Mensagem</div><div class="input-box ta"></div>
+              <a class="btn primary block" style="margin-top:10px;">Enviar</a>
+            </div>
+            <footer class="footer"><div class="tline w60"></div></footer>
+          </div>
+          <div class="fab mob">Wpp</div>
+        </div>
+      </div>
+
+      <div class="annot-col">
+        <div class="postit"><b>WhatsApp</b>Botão principal chama o atendimento diretamente.<span class="url">api.whatsapp.com/send/?phone=556192927630</span></div>
+        <div class="postit"><b>CMS</b>Horários repetem os cadastrados em Configurações do site.</div>
+        <div class="postit"><b>Formulário</b>Envio simples (nome, e-mail, mensagem) — sem integração de reserva; reservas seguem só pelo app.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       CMS / ADMIN (desktop only)
+  ========================================================== -->
+
+  <!-- 08 LOGIN -->
+  <section class="screen-section" id="scr-login">
+    <h2>08 · CMS — Login</h2>
+    <p class="screen-desc">Tela de acesso ao painel administrativo. Apenas versão desktop, conforme uso interno da equipe.</p>
+    <div class="frames-row">
+      <div class="frame-wrap">
+        <div class="frame-label">Desktop · 1100px</div>
+        <div class="frame-desktop short">
+          <div class="browser-chrome"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">admin.padelexperience.com.br/login</div></div>
+          <div class="frame-scroll" style="display:flex;align-items:center;justify-content:center;background:#f5f5f5;">
+            <div style="width:320px;border:1px solid #ccc;background:#fff;padding:26px;">
+              <div class="logo-box" style="margin:0 auto 18px;">LOGO</div>
+              <div class="tline hh w50" style="margin:0 auto 18px;text-align:center;"></div>
+              <div class="field-label">E-mail</div><div class="input-box" style="margin-bottom:12px;"></div>
+              <div class="field-label">Senha</div><div class="input-box" style="margin-bottom:14px;"></div>
+              <a class="btn primary block">Entrar</a>
+              <div class="tline w40" style="margin:14px auto 0;text-align:center;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annot-col">
+        <div class="postit"><b>Acesso restrito</b>Login apenas para equipe/administradores. Sem versão mobile — uso interno em desktop.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 DASHBOARD -->
+  <section class="screen-section" id="scr-dashboard">
+    <h2>09 · CMS — Dashboard</h2>
+    <p class="screen-desc">Atalhos para as coleções (eventos, notícias, banners, galeria) e lista dos últimos itens editados.</p>
+    <div class="frames-row">
+      <div class="frame-wrap">
+        <div class="frame-label">Desktop · 1100px</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">admin.padelexperience.com.br/dashboard</div></div>
+          <div class="frame-scroll">
+            <div class="admin-shell">
+              <aside class="admin-side">
+                <div class="logo-box">LOGO</div>
+                <a class="active">Dashboard</a>
+                <a>Eventos</a>
+                <a>Notícias</a>
+                <a>Banners da home</a>
+                <a>Galeria</a>
+                <a>Configurações</a>
+              </aside>
+              <div class="admin-main">
+                <div class="admin-topbar"><div class="tline w20" style="height:0;"></div><div style="display:flex;align-items:center;gap:8px;"><div class="tline w60" style="width:70px;"></div><div class="user-box">AD</div></div></div>
+                <div class="sec">
+                  <div class="tline h w25" style="margin-bottom:12px;">Atalhos</div>
+                  <div class="grid c4">
+                    <div class="card" style="text-align:center;"><div class="img-box" style="height:36px;width:36px;margin:0 auto 8px;"></div><div class="tline w70" style="margin:0 auto 8px;"></div><a class="btn sm outline">Novo evento</a></div>
+                    <div class="card" style="text-align:center;"><div class="img-box" style="height:36px;width:36px;margin:0 auto 8px;"></div><div class="tline w70" style="margin:0 auto 8px;"></div><a class="btn sm outline">Nova notícia</a></div>
+                    <div class="card" style="text-align:center;"><div class="img-box" style="height:36px;width:36px;margin:0 auto 8px;"></div><div class="tline w70" style="margin:0 auto 8px;"></div><a class="btn sm outline">Novo banner</a></div>
+                    <div class="card" style="text-align:center;"><div class="img-box" style="height:36px;width:36px;margin:0 auto 8px;"></div><div class="tline w70" style="margin:0 auto 8px;"></div><a class="btn sm outline">Nova foto</a></div>
+                  </div>
+                </div>
+                <div class="sec gray">
+                  <div class="tline h w35" style="margin-bottom:10px;">Últimos itens editados</div>
+                  <table class="tbl">
+                    <tr><th>Item</th><th>Coleção</th><th>Editado em</th><th>Status</th></tr>
+                    <tr><td><div class="tline w80"></div></td><td><div class="tline w60"></div></td><td><div class="tline w50"></div></td><td><span class="badge pub">Publicado</span></td></tr>
+                    <tr><td><div class="tline w80"></div></td><td><div class="tline w60"></div></td><td><div class="tline w50"></div></td><td><span class="badge draft">Rascunho</span></td></tr>
+                    <tr><td><div class="tline w80"></div></td><td><div class="tline w60"></div></td><td><div class="tline w50"></div></td><td><span class="badge pub">Publicado</span></td></tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annot-col">
+        <div class="postit"><b>Coleções</b>Sidebar do admin dá acesso a Eventos, Notícias, Banners da home, Galeria e Configurações.</div>
+        <div class="postit"><b>Atalhos</b>Botões criam item novo direto na tela de edição da respectiva coleção.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 LISTAGEM -->
+  <section class="screen-section" id="scr-listagem">
+    <h2>10 · CMS — Listagem de coleção (exemplo: Eventos)</h2>
+    <p class="screen-desc">Tabela com busca, filtro de status (publicado/rascunho) e botão para criar novo item. Padrão reaproveitado por Notícias, Banners e Galeria.</p>
+    <div class="frames-row">
+      <div class="frame-wrap">
+        <div class="frame-label">Desktop · 1100px</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">admin.padelexperience.com.br/eventos</div></div>
+          <div class="frame-scroll">
+            <div class="admin-shell">
+              <aside class="admin-side">
+                <div class="logo-box">LOGO</div>
+                <a>Dashboard</a>
+                <a class="active">Eventos</a>
+                <a>Notícias</a>
+                <a>Banners da home</a>
+                <a>Galeria</a>
+                <a>Configurações</a>
+              </aside>
+              <div class="admin-main">
+                <div class="admin-topbar"><div class="tline w20" style="height:0;"></div><div style="display:flex;align-items:center;gap:8px;"><div class="tline w60" style="width:70px;"></div><div class="user-box">AD</div></div></div>
+                <div class="sec">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <div class="tline h w20"></div>
+                    <a class="btn primary sm">+ Novo evento</a>
+                  </div>
+                  <div style="display:flex;gap:10px;margin-bottom:12px;">
+                    <div class="input-box" style="width:240px;height:28px;"></div>
+                    <div class="input-box" style="width:130px;height:28px;"></div>
+                  </div>
+                  <table class="tbl">
+                    <tr><th>Título</th><th>Data</th><th>Status</th><th>Ações</th></tr>
+                    <tr><td><div class="tline w85"></div></td><td><div class="tline w50"></div></td><td><span class="badge pub">Publicado</span></td><td><a class="btn sm outline">Editar</a> <a class="btn sm outline">Excluir</a></td></tr>
+                    <tr><td><div class="tline w85"></div></td><td><div class="tline w50"></div></td><td><span class="badge draft">Rascunho</span></td><td><a class="btn sm outline">Editar</a> <a class="btn sm outline">Excluir</a></td></tr>
+                    <tr><td><div class="tline w85"></div></td><td><div class="tline w50"></div></td><td><span class="badge pub">Publicado</span></td><td><a class="btn sm outline">Editar</a> <a class="btn sm outline">Excluir</a></td></tr>
+                    <tr><td><div class="tline w85"></div></td><td><div class="tline w50"></div></td><td><span class="badge draft">Rascunho</span></td><td><a class="btn sm outline">Editar</a> <a class="btn sm outline">Excluir</a></td></tr>
+                    <tr><td><div class="tline w85"></div></td><td><div class="tline w50"></div></td><td><span class="badge pub">Publicado</span></td><td><a class="btn sm outline">Editar</a> <a class="btn sm outline">Excluir</a></td></tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annot-col">
+        <div class="postit"><b>Busca + filtro</b>Campo de busca por título e dropdown de status (todos/publicado/rascunho).</div>
+        <div class="postit"><b>Ações</b>Editar abre a tela 11; excluir pede confirmação (não detalhado neste wireframe).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 EDICAO -->
+  <section class="screen-section" id="scr-edicao">
+    <h2>11 · CMS — Edição de item</h2>
+    <p class="screen-desc">Formulário de edição/criação: título, data, imagem (upload) e corpo rich-text. Botões salvar rascunho e publicar.</p>
+    <div class="frames-row">
+      <div class="frame-wrap">
+        <div class="frame-label">Desktop · 1100px</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">admin.padelexperience.com.br/eventos/novo</div></div>
+          <div class="frame-scroll">
+            <div class="admin-shell">
+              <aside class="admin-side">
+                <div class="logo-box">LOGO</div>
+                <a>Dashboard</a>
+                <a class="active">Eventos</a>
+                <a>Notícias</a>
+                <a>Banners da home</a>
+                <a>Galeria</a>
+                <a>Configurações</a>
+              </aside>
+              <div class="admin-main">
+                <div class="admin-topbar"><div class="tline w20" style="height:0;"></div><div style="display:flex;align-items:center;gap:8px;"><div class="tline w60" style="width:70px;"></div><div class="user-box">AD</div></div></div>
+                <div class="sec">
+                  <div class="tline h w25" style="margin-bottom:14px;">Editar evento</div>
+                  <div class="grid c2" style="max-width:700px;">
+                    <div><div class="field-label">Título</div><div class="input-box"></div></div>
+                    <div><div class="field-label">Data</div><div class="input-box"></div></div>
+                  </div>
+                  <div style="margin-top:12px;max-width:340px;">
+                    <div class="field-label">Imagem</div>
+                    <div class="img-box" style="height:110px;margin-bottom:8px;"><span class="img-label">preview</span></div>
+                    <a class="btn sm outline">Selecionar arquivo</a>
+                  </div>
+                  <div style="margin-top:14px;max-width:700px;">
+                    <div class="field-label">Descrição (corpo)</div>
+                    <div style="display:flex;gap:4px;margin-bottom:6px;">
+                      <div class="toolbar-icon">B</div><div class="toolbar-icon">I</div><div class="toolbar-icon">U</div><div class="toolbar-icon">Link</div><div class="toolbar-icon">IMG</div>
+                    </div>
+                    <div class="input-box ta" style="height:120px;"></div>
+                  </div>
+                  <div class="btn-row" style="margin-top:16px;">
+                    <a class="btn outline">Salvar rascunho</a>
+                    <a class="btn primary">Publicar</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annot-col">
+        <div class="postit"><b>Upload</b>Campo de imagem aceita upload local; preview substitui o placeholder tracejado.</div>
+        <div class="postit"><b>Rich text</b>Corpo com barra de formatação básica (negrito, itálico, sublinhado, link, imagem inline).</div>
+        <div class="postit"><b>Rascunho x publicar</b>"Salvar rascunho" mantém o item fora do site público; "Publicar" o exibe imediatamente.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 CONFIGURACOES -->
+  <section class="screen-section" id="scr-config">
+    <h2>12 · CMS — Configurações do site</h2>
+    <p class="screen-desc">Links (WhatsApp, lojas, Linktree, e-mail de parcerias), horários de funcionamento e endereço.</p>
+    <div class="frames-row">
+      <div class="frame-wrap">
+        <div class="frame-label">Desktop · 1100px</div>
+        <div class="frame-desktop">
+          <div class="browser-chrome"><span class="chrome-dot"></span><span class="chrome-dot"></span><span class="chrome-dot"></span><div class="chrome-url">admin.padelexperience.com.br/configuracoes</div></div>
+          <div class="frame-scroll">
+            <div class="admin-shell">
+              <aside class="admin-side">
+                <div class="logo-box">LOGO</div>
+                <a>Dashboard</a>
+                <a>Eventos</a>
+                <a>Notícias</a>
+                <a>Banners da home</a>
+                <a>Galeria</a>
+                <a class="active">Configurações</a>
+              </aside>
+              <div class="admin-main">
+                <div class="admin-topbar"><div class="tline w20" style="height:0;"></div><div style="display:flex;align-items:center;gap:8px;"><div class="tline w60" style="width:70px;"></div><div class="user-box">AD</div></div></div>
+                <div class="sec">
+                  <div class="tline h w25" style="margin-bottom:10px;">Links</div>
+                  <div class="grid c2" style="max-width:700px;">
+                    <div><div class="field-label">WhatsApp atendimento</div><div class="input-box"></div></div>
+                    <div><div class="field-label">WhatsApp canal VIP</div><div class="input-box"></div></div>
+                    <div><div class="field-label">App Store</div><div class="input-box"></div></div>
+                    <div><div class="field-label">Google Play</div><div class="input-box"></div></div>
+                    <div><div class="field-label">Linktree</div><div class="input-box"></div></div>
+                    <div><div class="field-label">E-mail de parcerias</div><div class="input-box"></div></div>
+                  </div>
+                </div>
+                <div class="sec gray">
+                  <div class="tline h w35" style="margin-bottom:10px;">Horários de funcionamento</div>
+                  <table class="tbl" style="max-width:520px;">
+                    <tr><th>Dia</th><th>Abertura</th><th>Fechamento</th></tr>
+                    <tr><td><div class="tline w70"></div></td><td><div class="input-box" style="height:26px;"></div></td><td><div class="input-box" style="height:26px;"></div></td></tr>
+                    <tr><td><div class="tline w70"></div></td><td><div class="input-box" style="height:26px;"></div></td><td><div class="input-box" style="height:26px;"></div></td></tr>
+                    <tr><td><div class="tline w70"></div></td><td><div class="input-box" style="height:26px;"></div></td><td><div class="input-box" style="height:26px;"></div></td></tr>
+                  </table>
+                </div>
+                <div class="sec">
+                  <div class="tline h w25" style="margin-bottom:10px;">Endereço</div>
+                  <div class="grid c2" style="max-width:700px;">
+                    <div><div class="field-label">Endereço completo</div><div class="input-box"></div></div>
+                    <div><div class="field-label">Link do mapa</div><div class="input-box"></div></div>
+                  </div>
+                  <a class="btn primary" style="margin-top:16px;">Salvar alterações</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annot-col">
+        <div class="postit"><b>Fonte única</b>Estes campos alimentam header, footer, CTAs de WhatsApp/lojas e a página Contato em todo o site público.</div>
+        <div class="postit"><b>Links reais atuais</b>
+          <span class="url">linktr.ee/padel.exp</span>
+          <span class="url">apps.apple.com/br/app/padel-experience-br/id6780433030</span>
+          <span class="url">play.google.com/.../es.tpc.matchpoint.appclient.padelexperiencebr</span>
+          <span class="url">whatsapp.com/channel/0029VbBqbSQGJP8ETgstVM29</span>
+          <span class="url">api.whatsapp.com/send/?phone=556192927630</span>
+          <span class="url">parcerias@padelexperience.com.br</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Minimal local JS: highlight the active sidebar link while scrolling. No network calls.
+  (function () {
+    var links = document.querySelectorAll('.sidebar-nav nav a');
+    var sections = document.querySelectorAll('.screen-section');
+    var map = {};
+    links.forEach(function (l) {
+      map[l.getAttribute('href').slice(1)] = l;
+    });
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            links.forEach(function (l) { l.classList.remove('active'); });
+            var link = map[entry.target.id];
+            if (link) link.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
+      sections.forEach(function (s) { observer.observe(s); });
+    }
+  })();
+</script>
+
+</body>
+</html>

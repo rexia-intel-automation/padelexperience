@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>{{ title }}</title>
+<meta name="description" content="{{ metaDescription or 'Padel Experience — padel no Aeroporto Internacional de Brasília, todos os dias, 24 horas.' }}">
+<link rel="icon" href="/img/app-logo-positive.svg">
+<link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+<canvas id="ballCanvas" aria-hidden="true"></canvas>
+
+<header class="topbar">
+  <a href="/#inicio" class="brand" aria-label="Padel Experience">
+    <img class="brand-mark" src="/img/app-logo-positive.svg" alt="Padel Experience">
+    <span class="brand-copy"><strong>Padel Experience</strong><span>Aeroporto de Brasília</span></span>
+  </a>
+  <div class="top-actions">
+    <button class="icon-btn" id="motionToggle" aria-label="Pausar bolas" title="Pausar animação">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 5v14M16 5v14"/></svg>
+    </button>
+    <button class="icon-btn" id="themeToggle" aria-label="Alternar tema" title="Alternar tema">
+      <svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></svg>
+    </button>
+    <a class="btn btn-primary topbar-cta" href="{{ bookingUrl or settings.whatsapp_atendimento }}" target="_blank" rel="noopener">Reservar quadra</a>
+  </div>
+</header>
+
+{% block content %}{% endblock %}
+
+<footer class="shell footer">
+  <div class="footer-col">
+    <span><strong>Padel Experience</strong> — {{ settings.location }}</span>
+    <span>{{ settings.hours }} • Instagram <a href="{{ settings.instagram }}" target="_blank" rel="noopener">@padel.exp</a></span>
+  </div>
+  <div class="footer-col footer-links">
+    <a href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener">WhatsApp</a>
+    <a href="{{ settings.whatsapp_canal_vip }}" target="_blank" rel="noopener">Canal VIP</a>
+    <a href="{{ settings.app_store }}" target="_blank" rel="noopener">App Store</a>
+    <a href="{{ settings.google_play }}" target="_blank" rel="noopener">Google Play</a>
+    <a href="{{ settings.linktree }}" target="_blank" rel="noopener">Linktree</a>
+    <a href="mailto:{{ settings.email_parcerias }}">Parcerias</a>
+  </div>
+</footer>
+
+<a class="whatsapp-float" href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 21l2-5.6A8.5 8.5 0 1 1 21 11.5Z"/></svg>
+</a>
+
+<nav class="dock" aria-label="Navegação rápida">
+  <a href="/#inicio" aria-label="Início"><span>Início</span><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 11 9-8 9 8v10h-6v-7H9v7H3Z"/></svg></a>
+  <a href="/#reservas" aria-label="Reservas"><span>Reservas</span><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></a>
+  <a href="/#equipamentos" aria-label="Equipamentos"><span>Equipamentos</span><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8.5" r="5.5"/><path d="M12 14v7M9 21h6"/></svg></a>
+  <a href="/#localizacao" aria-label="Localização"><span>Localização</span><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></a>
+  <a href="/#experiencia" aria-label="Experiência"><span>Experiência</span><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.7 5.8 6.3.8-4.6 4.3 1.2 6.1L12 17l-5.6 3 1.2-6.1L3 9.6l6.3-.8Z"/></svg></a>
+  <a href="/#parceiros" aria-label="Parceiros"><span>Parceiros</span><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.4 3.4-5 6.5-5s5.7 1.6 6.5 5"/><circle cx="17.5" cy="9" r="2.8"/><path d="M16 15.2c2.7.2 4.8 1.7 5.5 4.8"/></svg></a>
+</nav>
+
+<script src="/js/main.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

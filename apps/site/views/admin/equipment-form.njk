@@ -1,0 +1,45 @@
+{% extends "layouts/admin.njk" %}
+{% block content %}
+
+<div class="admin-topbar">
+  <div>
+    <h1>{{ 'Editar equipamento' if item else 'Novo equipamento' }}</h1>
+    <p>Preço por item de locação, como complemento da reserva.</p>
+  </div>
+  <a class="btn btn-ghost btn-sm" href="/admin/equipamentos">Voltar</a>
+</div>
+
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+
+<form class="form-grid card" method="post" action="{{ '/admin/equipamentos/' + item.id if item else '/admin/equipamentos' }}">
+  <input type="hidden" name="csrf" value="{{ csrfToken }}">
+  <div class="field">
+    <label for="name">Nome</label>
+    <input class="input" type="text" id="name" name="name" value="{{ item.name if item }}" required>
+  </div>
+  <div class="field">
+    <label for="description">Descrição</label>
+    <input class="input" type="text" id="description" name="description" value="{{ item.description if item }}">
+    <small>Ex.: Modelos Adidas Match</small>
+  </div>
+  <div class="field">
+    <label for="price">Preço (R$)</label>
+    <input class="input" type="text" id="price" name="price" value="{{ item.price if item }}">
+    <small>Somente o número, ex.: 25,00</small>
+  </div>
+  <div class="field">
+    <label for="unit">Unidade de cobrança</label>
+    <input class="input" type="text" id="unit" name="unit" value="{{ item.unit if item }}">
+    <small>Ex.: por hora, por reserva. Vazio exibe [A CONFIRMAR] no site.</small>
+  </div>
+  <div class="field">
+    <label for="sort">Ordem</label>
+    <input class="input" type="number" id="sort" name="sort" value="{{ item.sort if item else 0 }}">
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Salvar</button>
+    <a class="btn btn-ghost" href="/admin/equipamentos">Cancelar</a>
+  </div>
+</form>
+
+{% endblock %}

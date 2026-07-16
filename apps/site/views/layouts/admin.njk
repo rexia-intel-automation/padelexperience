@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>{{ title }}</title>
+<link rel="icon" href="/img/app-logo-positive.svg">
+<link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="admin-sidebar">
+    <a href="/admin" class="brand" aria-label="Padel Experience">
+      <img src="/img/app-logo-positive.svg" alt="Padel Experience" class="brand-mark">
+      <span class="brand-copy"><strong>Padel Experience</strong><span>Admin</span></span>
+    </a>
+    <nav class="admin-nav">
+      <a href="/admin" class="{{ 'active' if currentPath == '/admin' }}">Painel</a>
+      <a href="/admin/equipamentos" class="{{ 'active' if currentPath.startsWith('/admin/equipamentos') }}">Equipamentos</a>
+      <a href="/admin/parceiros" class="{{ 'active' if currentPath.startsWith('/admin/parceiros') }}">Parceiros</a>
+      <a href="/admin/galeria" class="{{ 'active' if currentPath.startsWith('/admin/galeria') }}">Galeria</a>
+      <a href="/admin/configuracoes" class="{{ 'active' if currentPath.startsWith('/admin/configuracoes') }}">Configurações</a>
+    </nav>
+    <div class="admin-nav-spacer"></div>
+    <form action="/admin/logout" method="post">
+      <input type="hidden" name="csrf" value="{{ csrfToken }}">
+      <button class="btn btn-ghost btn-sm" type="submit">Sair</button>
+    </form>
+  </aside>
+  <div class="admin-main">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+</body>
+</html>

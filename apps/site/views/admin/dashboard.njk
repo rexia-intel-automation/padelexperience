@@ -1,0 +1,43 @@
+{% extends "layouts/admin.njk" %}
+{% block content %}
+
+<div class="admin-topbar">
+  <div>
+    <h1>Painel</h1>
+    <p>Visão geral do conteúdo do Padel Experience.</p>
+  </div>
+</div>
+
+<div class="stat-row">
+  <div class="card stat-card">
+    <strong>{{ equipmentCount }}</strong>
+    <span>Equipamentos para locação</span>
+  </div>
+  <div class="card stat-card">
+    <strong>{{ partnerCount }}</strong>
+    <span>Parceiros</span>
+  </div>
+  <div class="card stat-card">
+    <strong>{{ galleryCount }}</strong>
+    <span>Imagens na galeria</span>
+  </div>
+</div>
+
+{% if pending.length %}
+<div class="card">
+  <h3 style="margin:0 0 6px">Pendências de conteúdo</h3>
+  <p style="margin:0 0 14px">Itens marcados como [A CONFIRMAR] no site. Resolva em Configurações ou nas coleções.</p>
+  <ul class="pending-list">
+    {% for item in pending %}
+    <li><span class="source-chip caution">Pendente</span> {{ item }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% else %}
+<div class="card">
+  <h3 style="margin:0 0 6px">Sem pendências</h3>
+  <p style="margin:0">Todo o conteúdo marcado como pendente foi confirmado.</p>
+</div>
+{% endif %}
+
+{% endblock %}
