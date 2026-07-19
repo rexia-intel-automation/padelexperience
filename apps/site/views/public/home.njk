@@ -8,7 +8,7 @@
       <h1>Jogue.<br><span>Viva.</span><br>Repita.</h1>
       <p>Espaço de padel voltado a jogadores, visitantes, conexões e experiências. Quadras abertas todos os dias, 24 horas, no Aeroporto Internacional de Brasília.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="{{ bookingUrl }}" target="_blank" rel="noopener">Reservar quadra
+        <a class="btn btn-primary" href="{{ bookingUrl }}" data-reserve data-ios="{{ settings.app_store }}" data-android="{{ settings.google_play }}" target="_blank" rel="noopener">Reservar quadra
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
         </a>
         <a class="btn btn-outline" href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
@@ -128,7 +128,7 @@
     <div class="cta">
       <div><span class="eyebrow">Pronto para jogar?</span><h3>Sua próxima partida começa aqui.</h3><p>Encontre um horário, convide seus parceiros e reserve a quadra sem atrito.</p></div>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="{{ bookingUrl }}" target="_blank" rel="noopener">Reservar quadra
+        <a class="btn btn-primary" href="{{ bookingUrl }}" data-reserve data-ios="{{ settings.app_store }}" data-android="{{ settings.google_play }}" target="_blank" rel="noopener">Reservar quadra
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
         </a>
         <a class="btn btn-outline" href="{{ settings.app_store }}" target="_blank" rel="noopener">App Store</a>

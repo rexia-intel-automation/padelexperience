@@ -29,6 +29,17 @@
     sections.forEach(s => observer.observe(s));
   }
 
+  // Reserve CTAs: on mobile, point to the Matchpoint app store listing
+  // (store page opens the app when installed). Desktop keeps the default href.
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/.test(navigator.userAgent);
+  if (isIOS || isAndroid) {
+    document.querySelectorAll('a[data-reserve]').forEach(a => {
+      const url = isIOS ? a.dataset.ios : a.dataset.android;
+      if (url) a.href = url;
+    });
+  }
+
   const canvas = document.getElementById('ballCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');

@@ -21,7 +21,7 @@
     <button class="icon-btn" id="themeToggle" aria-label="Alternar tema" title="Alternar tema">
       <svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></svg>
     </button>
-    <a class="btn btn-primary topbar-cta" href="{{ bookingUrl or settings.whatsapp_atendimento }}" target="_blank" rel="noopener">Reservar quadra</a>
+    <a class="btn btn-primary topbar-cta" href="{{ bookingUrl or settings.whatsapp_atendimento }}" data-reserve data-ios="{{ settings.app_store }}" data-android="{{ settings.google_play }}" target="_blank" rel="noopener">Reservar quadra</a>
   </div>
 </header>
 
