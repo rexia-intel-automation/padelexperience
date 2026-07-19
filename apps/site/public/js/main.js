@@ -32,8 +32,7 @@
   const canvas = document.getElementById('ballCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  let running = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let raf = null;
+  const running = !matchMedia('(prefers-reduced-motion: reduce)').matches;
   const dpr = Math.min(devicePixelRatio || 1, 2);
   let w = 0, h = 0;
 
@@ -81,19 +80,7 @@
       if(b.y-b.r<0){b.y=b.r;b.vy*=-1}
       drawBall(b);
     });
-    if(running) raf=requestAnimationFrame(frame);
+    if(running) requestAnimationFrame(frame);
   }
   frame();
-
-  const motionToggle = document.getElementById('motionToggle');
-  if (motionToggle) {
-    motionToggle.addEventListener('click', e => {
-      running=!running;
-      e.currentTarget.innerHTML = running
-        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 5v14M16 5v14"/></svg>'
-        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="m8 5 11 7-11 7Z"/></svg>';
-      e.currentTarget.setAttribute('aria-label', running?'Pausar bolas':'Reproduzir bolas');
-      if(running) frame(); else cancelAnimationFrame(raf);
-    });
-  }
 })();
