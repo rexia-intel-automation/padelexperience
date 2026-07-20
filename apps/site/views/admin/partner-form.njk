@@ -36,10 +36,15 @@
     <input class="input" type="url" id="announcement_url" name="announcement_url" value="{{ item.announcement_url if item }}">
   </div>
   <div class="field">
-    <label for="logo">Logo</label>
+    <label for="logo">Logo (arquivo SVG ou PNG)</label>
     {% if item and item.logo %}<img class="form-thumb" src="{{ item.logo }}" alt="Logo atual">{% endif %}
-    <input class="input" type="file" id="logo" name="logo" accept="image/*">
+    <input class="input" type="file" id="logo" name="logo" accept=".svg,.png,image/svg+xml,image/png">
     <small>Sem logo, o card aparece só com texto no site.</small>
+  </div>
+  <div class="field">
+    <label for="logo_url">Logo por link (URL)</label>
+    <input class="input" type="url" id="logo_url" name="logo_url" value="{{ item.logo if item and item.logo and item.logo.startsWith('http') }}" placeholder="https://...">
+    <small>Alternativa ao upload: link direto para o arquivo da logo na fonte oficial. Se um arquivo for enviado acima, ele tem prioridade.</small>
   </div>
   <div class="field">
     <label for="sort">Ordem</label>

@@ -32,6 +32,12 @@ const upload = multer({
   },
 });
 
+// Partner logos may also be provided as a direct link to the official source.
+function externalLogoUrl(value) {
+  const url = String(value || '').trim();
+  return /^https?:\/\//.test(url) ? url : '';
+}
+
 function notFound(res, message) {
   return res.status(404).render('admin/error.njk', { title: 'Não encontrado', message });
 }
@@ -172,8 +178,8 @@ router.get('/parceiros/novo', (req, res) => {
   res.render('admin/partner-form.njk', { title: 'Novo parceiro — Admin', item: null });
 });
 
-router.post('/parceiros', verifyCsrf, upload.single('logo'), (req, res) => {
-  const { name = '', role = '', description = '', instagram_url = '', announcement_url = '', sort = 0 } = req.body;
+router.post('/parceiros', upload.single('logo'), verifyCsrf, (req, res) => {
+  const { name = '', role = '', description = '', instagram_url = '', announcement_url = '', logo_url = '', sort = 0 } = req.body;
   if (!name.trim()) {
     return res.status(400).render('admin/partner-form.njk', {
       title: 'Novo parceiro — Admin',
@@ -181,7 +187,7 @@ router.post('/parceiros', verifyCsrf, upload.single('logo'), (req, res) => {
       error: 'Nome é obrigatório.',
     });
   }
-  const logo = req.file ? `/uploads/${req.file.filename}` : null;
+  const logo = req.file ? `/uploads/${req.file.filename}` : (externalLogoUrl(logo_url) || null);
   db.prepare(
     'INSERT INTO partners (name, role, description, instagram_url, announcement_url, logo, sort) VALUES (?, ?, ?, ?, ?, ?, ?)'
   ).run(name.trim(), role, description, instagram_url, announcement_url, logo, Number(sort) || 0);
@@ -194,10 +200,10 @@ router.get('/parceiros/:id/editar', (req, res) => {
   res.render('admin/partner-form.njk', { title: 'Editar parceiro — Admin', item });
 });
 
-router.post('/parceiros/:id', verifyCsrf, upload.single('logo'), (req, res) => {
+router.post('/parceiros/:id', upload.single('logo'), verifyCsrf, (req, res) => {
   const item = db.prepare('SELECT * FROM partners WHERE id = ?').get(req.params.id);
   if (!item) return notFound(res, 'Parceiro não encontrado.');
-  const { name = '', role = '', description = '', instagram_url = '', announcement_url = '', sort = 0 } = req.body;
+  const { name = '', role = '', description = '', instagram_url = '', announcement_url = '', logo_url = '', sort = 0 } = req.body;
   if (!name.trim()) {
     return res.status(400).render('admin/partner-form.njk', {
       title: 'Editar parceiro — Admin',
@@ -205,7 +211,7 @@ router.post('/parceiros/:id', verifyCsrf, upload.single('logo'), (req, res) => {
       error: 'Nome é obrigatório.',
     });
   }
-  const logo = req.file ? `/uploads/${req.file.filename}` : item.logo;
+  const logo = req.file ? `/uploads/${req.file.filename}` : (externalLogoUrl(logo_url) || item.logo);
   db.prepare(
     'UPDATE partners SET name = ?, role = ?, description = ?, instagram_url = ?, announcement_url = ?, logo = ?, sort = ? WHERE id = ?'
   ).run(name.trim(), role, description, instagram_url, announcement_url, logo, Number(sort) || 0, item.id);
@@ -239,7 +245,7 @@ router.get('/galeria/novo', (req, res) => {
   res.render('admin/gallery-form.njk', { title: 'Nova imagem — Admin', item: null });
 });
 
-router.post('/galeria', verifyCsrf, upload.single('image'), (req, res) => {
+router.post('/galeria', upload.single('image'), verifyCsrf, (req, res) => {
   if (!req.file) {
     return res.status(400).render('admin/gallery-form.njk', {
       title: 'Nova imagem — Admin',
@@ -262,7 +268,7 @@ router.get('/galeria/:id/editar', (req, res) => {
   res.render('admin/gallery-form.njk', { title: 'Editar imagem — Admin', item });
 });
 
-router.post('/galeria/:id', verifyCsrf, upload.single('image'), (req, res) => {
+router.post('/galeria/:id', upload.single('image'), verifyCsrf, (req, res) => {
   const item = db.prepare('SELECT * FROM gallery WHERE id = ?').get(req.params.id);
   if (!item) return notFound(res, 'Imagem não encontrada.');
   const { caption = '', sort = 0 } = req.body;
