@@ -25,12 +25,7 @@
   <div class="field">
     <label for="price">Preço (R$)</label>
     <input class="input" type="text" id="price" name="price" value="{{ item.price if item }}">
-    <small>Somente o número, ex.: 25,00</small>
-  </div>
-  <div class="field">
-    <label for="unit">Unidade de cobrança</label>
-    <input class="input" type="text" id="unit" name="unit" value="{{ item.unit if item }}">
-    <small>Ex.: por hora, por reserva. Vazio exibe [A CONFIRMAR] no site.</small>
+    <small>Somente o número, ex.: 25,00. Locação é sempre cobrada por hora.</small>
   </div>
   <div class="field">
     <label for="sort">Ordem</label>

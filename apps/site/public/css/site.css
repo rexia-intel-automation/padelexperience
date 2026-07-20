@@ -517,16 +517,41 @@ details.audit[open] summary{border-bottom:1px solid var(--border)}
 /* partner card without an uploaded logo */
 .partner-card.no-logo{grid-template-columns:1fr}
 
-/* public gallery */
+/* public gallery (columns come from the count-aware .grid-cols-N classes) */
 .gallery-grid{display:grid;gap:14px;grid-template-columns:1fr}
-@media (min-width:641px){.gallery-grid{grid-template-columns:repeat(2,1fr)}}
-@media (min-width:901px){.gallery-grid{grid-template-columns:repeat(3,1fr)}}
 .gallery-grid figure{margin:0;border:1px solid var(--border);border-radius:18px;overflow:hidden;background:var(--surface-2)}
 .gallery-grid img{width:100%;height:240px;object-fit:cover}
 .gallery-grid figcaption{padding:10px 14px;font-size:12px;color:var(--muted)}
 
 .section-note{color:var(--muted);font-size:13px;margin-top:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .section-note a{text-decoration:underline;text-underline-offset:3px}
+
+/* count-aware card grids: the server picks a column count that never leaves
+   a single card alone on a row (2x2 instead of 3+1, 1x4, 3+2, ...) */
+.grid-cols-1{grid-template-columns:1fr}
+.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:900px){
+  /* 4 -> 2x2; 3 stays 3-across so no card is ever alone on a row */
+  .grid-cols-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .grid-cols-2,.grid-cols-3,.grid-cols-4{grid-template-columns:1fr}
+}
+
+/* pricing: featured card with image on the left, promo cards below */
+.price-card.featured{display:grid;grid-template-columns:minmax(0,320px) 1fr;gap:0;padding:0;overflow:hidden}
+.price-card.featured img{width:100%;height:100%;min-height:220px;object-fit:cover;display:block}
+.price-card.featured .price-body{padding:24px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px}
+@media (max-width:640px){
+  .price-card.featured{grid-template-columns:1fr}
+  .price-card.featured img{min-height:180px;max-height:220px}
+}
+.promo-grid{margin-top:14px}
+
+/* equipment rental is always billed per hour */
+.equipment-item strong .unit{font-size:13px;font-weight:500;color:var(--muted)}
 
 .footer{flex-wrap:wrap}
 .footer-col{display:grid;gap:6px;align-content:start}

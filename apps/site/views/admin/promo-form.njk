@@ -1,0 +1,48 @@
+{% extends "layouts/admin.njk" %}
+{% block content %}
+
+<div class="admin-topbar">
+  <div>
+    <h1>{{ 'Editar promoção' if item else 'Nova promoção' }}</h1>
+    <p>O card só aparece na seção "Reservas" do site enquanto estiver marcado como ativo.</p>
+  </div>
+  <a class="btn btn-ghost btn-sm" href="/admin/promocoes">Voltar</a>
+</div>
+
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+
+<form class="form-grid card" method="post" action="{{ '/admin/promocoes/' + item.id if item else '/admin/promocoes' }}">
+  <input type="hidden" name="csrf" value="{{ csrfToken }}">
+  <div class="field">
+    <label for="title">Título</label>
+    <input class="input" type="text" id="title" name="title" value="{{ item.title if item }}" required>
+    <small>Ex.: Inauguração, Horário comercial, Madrugada.</small>
+  </div>
+  <div class="field">
+    <label for="price">Preço (R$)</label>
+    <input class="input" type="text" id="price" name="price" value="{{ item.price if item }}">
+    <small>Somente o número, ex.: 120,00</small>
+  </div>
+  <div class="field">
+    <label for="price_note">Complemento do preço</label>
+    <input class="input" type="text" id="price_note" name="price_note" value="{{ item.price_note if item else '/ hora / quadra' }}">
+  </div>
+  <div class="field">
+    <label for="description">Descrição</label>
+    <input class="input" type="text" id="description" name="description" value="{{ item.description if item }}">
+    <small>Ex.: Referência divulgada: R$ 30,00 por pessoa.</small>
+  </div>
+  <div class="field">
+    <label for="active"><input type="checkbox" id="active" name="active" value="1" {{ 'checked' if item and item.active }}> Ativa (exibir no site)</label>
+  </div>
+  <div class="field">
+    <label for="sort">Ordem</label>
+    <input class="input" type="number" id="sort" name="sort" value="{{ item.sort if item else 0 }}">
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Salvar</button>
+    <a class="btn btn-ghost" href="/admin/promocoes">Cancelar</a>
+  </div>
+</form>
+
+{% endblock %}

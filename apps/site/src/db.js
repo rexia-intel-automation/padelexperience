@@ -74,6 +74,16 @@ const SCHEMA = [
     caption VARCHAR(512) NOT NULL DEFAULT '',
     sort INT NOT NULL DEFAULT 0
   )`,
+  // Promo cards on the pricing section: shown on the site only while active.
+  `CREATE TABLE IF NOT EXISTS promos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    price VARCHAR(64) NOT NULL DEFAULT '',
+    price_note VARCHAR(128) NOT NULL DEFAULT '/ hora / quadra',
+    description VARCHAR(512) NOT NULL DEFAULT '',
+    active TINYINT NOT NULL DEFAULT 0,
+    sort INT NOT NULL DEFAULT 0
+  )`,
   `CREATE TABLE IF NOT EXISTS settings (
     \`key\` VARCHAR(191) PRIMARY KEY,
     value TEXT NOT NULL
@@ -168,6 +178,16 @@ async function seed() {
         [partner.name, partner.role, partner.description, partner.instagram_url, partner.announcement_url, partner.sort]
       );
     }
+  }
+
+  const promoCount = (await get('SELECT COUNT(*) AS n FROM promos')).n;
+  if (promoCount === 0) {
+    // Launch promo from the style guide; inactive because the promo period ended
+    // and promo cards are now toggled manually in the CMS.
+    await run(
+      'INSERT INTO promos (title, price, price_note, description, active, sort) VALUES (?, ?, ?, ?, 0, 1)',
+      ['Inauguração', '120,00', '/ hora / quadra', 'Referência divulgada: R$ 30,00 por pessoa.']
+    );
   }
 
   const galleryCount = (await get('SELECT COUNT(*) AS n FROM gallery')).n;

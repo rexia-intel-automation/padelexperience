@@ -31,7 +31,7 @@ Monorepo npm workspaces, Node 22 (`.nvmrc`), **um único app** em `apps/site`: E
 
 - Arquivo de ~7 MB: NUNCA ler inteiro (linhas gigantes de base64 no body). O CSS fica no bloco `<style>` do início; a seção `id="guia"` ("07 — Guia de conteúdo") tem os fatos do negócio: preços (promo R$ 120/h até 19/07/2026, regular R$ 150/h), equipamentos Adidas, 4 parceiros com funções exatas, pendências.
 - `public/css/site.css` = bloco `<style>` do guia copiado **verbatim** + bloco "Site additions" no fim (adições usam apenas tokens do guia; nenhum hex novo). Não editar o bloco do guia.
-- Regras que vieram do guia e devem ser preservadas: card promocional sai automaticamente após `promo_ends`; parceiras são "parceira"/função indicada, nunca "patrocinadora"; dados não confirmados exibem "[A CONFIRMAR]" (canal de reserva, unidade de cobrança da locação, regras de cancelamento, instruções de acesso).
+- Regras vivas (guia + decisões do cliente em 2026-07-19): parceiras são "parceira"/função indicada, nunca "patrocinadora"; cards de promoção são manuais — coleção `promos` no CMS, só aparecem com `active` marcado (o auto-hide por `promo_ends` foi removido); o site não exibe mais "[A CONFIRMAR]" — locação é sempre por hora, regras de cancelamento ficam no app de agendamento e o card "Acesso" só aparece se `access_notes` estiver preenchido; grids de cards nunca deixam um card sozinho na linha (classes `.grid-cols-N` calculadas por `gridCols()` em `routes/public.js`).
 - `reference/padelexp_00.txt` — links oficiais (WhatsApp, lojas, Linktree, parcerias@). Nunca digitar links de memória; os seeds em `db.js` já os carregam.
 - Logos do cliente em `reference/init_assets/` (SVGs copiados para `apps/site/public/img/`).
 

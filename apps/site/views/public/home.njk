@@ -35,21 +35,26 @@
       <div><span class="eyebrow">01 — Reservas</span><h2>Reserve sua quadra</h2></div>
       <p>Valor por hora e por quadra, com referência de divisão por pessoa. Encontre um horário, convide seus parceiros e entre em quadra.</p>
     </div>
-    <div class="price-grid">
-      {% if promoActive %}
-      <div class="price-card promo">
-        <span class="badge highlight">Inauguração • até {{ settings.promo_ends | shortdate }}</span>
-        <div class="price">R$ {{ settings.promo_price }} <span>/ hora / quadra</span></div>
-        <div class="per-person">Referência divulgada: R$ {{ settings.promo_per_person }} por pessoa.</div>
-      </div>
-      {% endif %}
-      <div class="price-card">
+    <div class="price-card featured">
+      {% if priceImage %}<img src="{{ priceImage }}" alt="Quadras do Padel Experience">{% endif %}
+      <div class="price-body">
         <span class="badge">Valor regular</span>
         <div class="price">R$ {{ settings.regular_price }} <span>/ hora / quadra</span></div>
         <div class="per-person">Referência divulgada: R$ {{ settings.regular_per_person }} por pessoa.</div>
       </div>
     </div>
-    <p class="section-note">Regras de cancelamento: {% if settings.cancel_policy %}{{ settings.cancel_policy }}{% else %}<span class="source-chip caution">[A CONFIRMAR]</span>{% endif %}</p>
+    {% if promos.length %}
+    <div class="price-grid promo-grid grid-cols-{{ promoCols }}">
+      {% for promo in promos %}
+      <div class="price-card promo">
+        <span class="badge highlight">{{ promo.title }}</span>
+        <div class="price">R$ {{ promo.price }} <span>{{ promo.price_note }}</span></div>
+        {% if promo.description %}<div class="per-person">{{ promo.description }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <p class="section-note">Regras de cancelamento e condições da reserva ficam no app de agendamento.</p>
   </section>
 
   <section class="section shell" id="equipamentos">
@@ -63,11 +68,11 @@
         <div class="bar"></div>
         <h4>{{ item.name }}</h4>
         <p>{{ item.description }}</p>
-        <strong>R$ {{ item.price }}</strong>
+        <strong>R$ {{ item.price }} <span class="unit">/ hora</span></strong>
       </div>
       {% endfor %}
     </div>
-    <p class="section-note">Unidade de cobrança da locação: <span class="source-chip caution">[A CONFIRMAR]</span></p>
+    <p class="section-note">Locação cobrada por hora, como complemento da reserva.</p>
   </section>
 
   <section class="section shell" id="localizacao">
@@ -75,10 +80,10 @@
       <div><span class="eyebrow">03 — Localização</span><h2>Onde jogar</h2></div>
       <p>No estacionamento do bolsão "A" do Aeroporto Internacional de Brasília — para quem vive na cidade e para quem está de passagem.</p>
     </div>
-    <div class="guide-summary">
+    <div class="guide-summary grid-cols-{{ factCols }}">
       <div class="fact-card accent"><small>Local</small><strong>Aeroporto Internacional de Brasília</strong><p>Estacionamento do bolsão "A".</p></div>
       <div class="fact-card highlight"><small>Funcionamento</small><strong>{{ settings.hours }}</strong><p>Jogue no horário que fizer sentido para você.</p></div>
-      <div class="fact-card"><small>Acesso</small><strong>Como chegar</strong><p>{% if settings.access_notes %}{{ settings.access_notes }}{% else %}Instruções de acesso e estacionamento [A CONFIRMAR].{% endif %}</p></div>
+      {% if settings.access_notes %}<div class="fact-card"><small>Acesso</small><strong>Como chegar</strong><p>{{ settings.access_notes }}</p></div>{% endif %}
       <div class="fact-card"><small>Atendimento</small><strong>WhatsApp</strong><p><a href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener">Fale com a equipe</a> para dúvidas sobre reservas e acesso.</p></div>
     </div>
   </section>
@@ -89,7 +94,7 @@
       <p>Estrutura pensada para quem joga e para quem acompanha — incluindo o Lounge VIP assinado pela Casa Érgo.</p>
     </div>
     {% if gallery.length %}
-    <div class="gallery-grid">
+    <div class="gallery-grid grid-cols-{{ galleryCols }}">
       {% for item in gallery %}
       <figure>
         <img src="{{ item.image }}" alt="{{ item.caption }}">

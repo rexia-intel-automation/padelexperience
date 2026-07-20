@@ -113,10 +113,7 @@ router.get('/', wrap(async (req, res) => {
   const settings = res.locals.settings;
   const pending = [];
   if (!settings.booking_url) pending.push('Canal final de reserva (CTA "Reservar quadra" usa o WhatsApp)');
-  if (!settings.cancel_policy) pending.push('Regras de cancelamento');
   if (!settings.access_notes) pending.push('Instruções de acesso ao bolsão A');
-  const equipmentUnitPending = (await get("SELECT COUNT(*) AS n FROM equipment WHERE unit = ''")).n;
-  if (equipmentUnitPending > 0) pending.push('Unidade de cobrança dos equipamentos');
 
   res.render('admin/dashboard.njk', {
     title: 'Painel — Admin Padel Experience',
@@ -139,7 +136,7 @@ router.get('/equipamentos/novo', (req, res) => {
 });
 
 router.post('/equipamentos', verifyCsrf, wrap(async (req, res) => {
-  const { name = '', description = '', price = '', unit = '', sort = 0 } = req.body;
+  const { name = '', description = '', price = '', sort = 0 } = req.body;
   if (!name.trim()) {
     return res.status(400).render('admin/equipment-form.njk', {
       title: 'Novo equipamento — Admin',
@@ -147,8 +144,8 @@ router.post('/equipamentos', verifyCsrf, wrap(async (req, res) => {
       error: 'Nome é obrigatório.',
     });
   }
-  await run('INSERT INTO equipment (name, description, price, unit, sort) VALUES (?, ?, ?, ?, ?)', [
-    name.trim(), description, price, unit, Number(sort) || 0,
+  await run('INSERT INTO equipment (name, description, price, sort) VALUES (?, ?, ?, ?)', [
+    name.trim(), description, price, Number(sort) || 0,
   ]);
   res.redirect('/admin/equipamentos');
 }));
@@ -162,7 +159,7 @@ router.get('/equipamentos/:id/editar', wrap(async (req, res) => {
 router.post('/equipamentos/:id', verifyCsrf, wrap(async (req, res) => {
   const item = await get('SELECT * FROM equipment WHERE id = ?', [req.params.id]);
   if (!item) return notFound(res, 'Equipamento não encontrado.');
-  const { name = '', description = '', price = '', unit = '', sort = 0 } = req.body;
+  const { name = '', description = '', price = '', sort = 0 } = req.body;
   if (!name.trim()) {
     return res.status(400).render('admin/equipment-form.njk', {
       title: 'Editar equipamento — Admin',
@@ -170,8 +167,8 @@ router.post('/equipamentos/:id', verifyCsrf, wrap(async (req, res) => {
       error: 'Nome é obrigatório.',
     });
   }
-  await run('UPDATE equipment SET name = ?, description = ?, price = ?, unit = ?, sort = ? WHERE id = ?', [
-    name.trim(), description, price, unit, Number(sort) || 0, item.id,
+  await run('UPDATE equipment SET name = ?, description = ?, price = ?, sort = ? WHERE id = ?', [
+    name.trim(), description, price, Number(sort) || 0, item.id,
   ]);
   res.redirect('/admin/equipamentos');
 }));
@@ -190,6 +187,71 @@ router.get('/equipamentos/:id/excluir', wrap(async (req, res) => {
 router.post('/equipamentos/:id/excluir', verifyCsrf, wrap(async (req, res) => {
   await run('DELETE FROM equipment WHERE id = ?', [req.params.id]);
   res.redirect('/admin/equipamentos');
+}));
+
+// ---------- promos (promoções) ----------
+
+router.get('/promocoes', wrap(async (req, res) => {
+  const items = await all('SELECT * FROM promos ORDER BY sort ASC, id ASC');
+  res.render('admin/promo-list.njk', { title: 'Promoções — Admin', items });
+}));
+
+router.get('/promocoes/novo', (req, res) => {
+  res.render('admin/promo-form.njk', { title: 'Nova promoção — Admin', item: null });
+});
+
+router.post('/promocoes', verifyCsrf, wrap(async (req, res) => {
+  const { title = '', price = '', price_note = '/ hora / quadra', description = '', sort = 0 } = req.body;
+  if (!title.trim()) {
+    return res.status(400).render('admin/promo-form.njk', {
+      title: 'Nova promoção — Admin',
+      item: null,
+      error: 'Título é obrigatório.',
+    });
+  }
+  await run('INSERT INTO promos (title, price, price_note, description, active, sort) VALUES (?, ?, ?, ?, ?, ?)', [
+    title.trim(), price, price_note, description, req.body.active ? 1 : 0, Number(sort) || 0,
+  ]);
+  res.redirect('/admin/promocoes');
+}));
+
+router.get('/promocoes/:id/editar', wrap(async (req, res) => {
+  const item = await get('SELECT * FROM promos WHERE id = ?', [req.params.id]);
+  if (!item) return notFound(res, 'Promoção não encontrada.');
+  res.render('admin/promo-form.njk', { title: 'Editar promoção — Admin', item });
+}));
+
+router.post('/promocoes/:id', verifyCsrf, wrap(async (req, res) => {
+  const item = await get('SELECT * FROM promos WHERE id = ?', [req.params.id]);
+  if (!item) return notFound(res, 'Promoção não encontrada.');
+  const { title = '', price = '', price_note = '/ hora / quadra', description = '', sort = 0 } = req.body;
+  if (!title.trim()) {
+    return res.status(400).render('admin/promo-form.njk', {
+      title: 'Editar promoção — Admin',
+      item,
+      error: 'Título é obrigatório.',
+    });
+  }
+  await run('UPDATE promos SET title = ?, price = ?, price_note = ?, description = ?, active = ?, sort = ? WHERE id = ?', [
+    title.trim(), price, price_note, description, req.body.active ? 1 : 0, Number(sort) || 0, item.id,
+  ]);
+  res.redirect('/admin/promocoes');
+}));
+
+router.get('/promocoes/:id/excluir', wrap(async (req, res) => {
+  const item = await get('SELECT * FROM promos WHERE id = ?', [req.params.id]);
+  if (!item) return notFound(res, 'Promoção não encontrada.');
+  res.render('admin/confirm-delete.njk', {
+    title: 'Excluir promoção — Admin',
+    itemLabel: item.title,
+    actionUrl: `/admin/promocoes/${item.id}/excluir`,
+    backUrl: '/admin/promocoes',
+  });
+}));
+
+router.post('/promocoes/:id/excluir', verifyCsrf, wrap(async (req, res) => {
+  await run('DELETE FROM promos WHERE id = ?', [req.params.id]);
+  res.redirect('/admin/promocoes');
 }));
 
 // ---------- partners (parceiros) ----------
@@ -365,15 +427,11 @@ const SETTINGS_FIELDS = [
   { key: 'linktree', label: 'Linktree', hint: '' },
   { key: 'instagram', label: 'Instagram', hint: '' },
   { key: 'email_parcerias', label: 'E-mail de parcerias', hint: '' },
-  { key: 'promo_price', label: 'Preço promocional (R$/hora/quadra)', hint: 'Somente o número, ex.: 120,00' },
-  { key: 'promo_per_person', label: 'Referência por pessoa (promocional)', hint: 'Ex.: 30,00' },
-  { key: 'promo_ends', label: 'Fim da promoção (AAAA-MM-DD)', hint: 'Após esta data o card promocional sai do site automaticamente.' },
   { key: 'regular_price', label: 'Preço regular (R$/hora/quadra)', hint: 'Ex.: 150,00' },
   { key: 'regular_per_person', label: 'Referência por pessoa (regular)', hint: 'Ex.: 37,50' },
   { key: 'hours', label: 'Funcionamento', hint: '' },
   { key: 'location', label: 'Localização', hint: '' },
-  { key: 'access_notes', label: 'Instruções de acesso', hint: 'Pendente de confirmação — vazio exibe [A CONFIRMAR] no site.' },
-  { key: 'cancel_policy', label: 'Regras de cancelamento', hint: 'Pendente de confirmação — vazio exibe [A CONFIRMAR] no site.' },
+  { key: 'access_notes', label: 'Instruções de acesso', hint: 'Vazio = o card "Acesso" não aparece no site.' },
 ];
 
 router.get('/configuracoes', (req, res) => {

@@ -1,0 +1,39 @@
+{% extends "layouts/admin.njk" %}
+{% block content %}
+
+<div class="admin-topbar">
+  <div>
+    <h1>Promoções</h1>
+    <p>Cards de promoção da seção "Reservas". Só aparecem no site enquanto marcados como ativos.</p>
+  </div>
+  <a class="btn btn-primary" href="/admin/promocoes/novo">Nova promoção</a>
+</div>
+
+{% if items.length %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Título</th><th>Preço</th><th>Descrição</th><th>Status</th><th>Ordem</th><th></th></tr></thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.title }}</td>
+        <td>R$ {{ item.price }} {{ item.price_note }}</td>
+        <td>{{ item.description }}</td>
+        <td>{% if item.active %}<span class="badge success">No site</span>{% else %}<span class="source-chip caution">Oculta</span>{% endif %}</td>
+        <td>{{ item.sort }}</td>
+        <td>
+          <div class="row-actions">
+            <a class="btn btn-ghost btn-sm" href="/admin/promocoes/{{ item.id }}/editar">Editar</a>
+            <a class="btn btn-danger btn-sm" href="/admin/promocoes/{{ item.id }}/excluir">Excluir</a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty"><div><h3>Nenhuma promoção cadastrada</h3><p>Crie um card de promoção e marque como ativo para exibi-lo no site.</p><a class="btn btn-primary" href="/admin/promocoes/novo">Nova promoção</a></div></div>
+{% endif %}
+
+{% endblock %}

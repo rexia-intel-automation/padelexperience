@@ -12,14 +12,13 @@
 {% if items.length %}
 <div class="table-wrap">
   <table>
-    <thead><tr><th>Nome</th><th>Descrição</th><th>Preço</th><th>Unidade de cobrança</th><th>Ordem</th><th></th></tr></thead>
+    <thead><tr><th>Nome</th><th>Descrição</th><th>Preço</th><th>Ordem</th><th></th></tr></thead>
     <tbody>
       {% for item in items %}
       <tr>
         <td>{{ item.name }}</td>
         <td>{{ item.description }}</td>
-        <td>R$ {{ item.price }}</td>
-        <td>{% if item.unit %}{{ item.unit }}{% else %}<span class="source-chip caution">[A CONFIRMAR]</span>{% endif %}</td>
+        <td>R$ {{ item.price }} / hora</td>
         <td>{{ item.sort }}</td>
         <td>
           <div class="row-actions">
