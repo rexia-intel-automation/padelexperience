@@ -40,7 +40,13 @@
       <div class="price-body">
         <span class="badge">Valor regular</span>
         <div class="price">R$ {{ settings.regular_price }} <span>/ hora / quadra</span></div>
-        <div class="per-person">Referência divulgada: R$ {{ settings.regular_per_person }} por pessoa.</div>
+        <div class="per-person">Preço por pessoa: R$ {{ settings.regular_per_person }}.</div>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="{{ bookingUrl }}" data-reserve data-ios="{{ settings.app_store }}" data-android="{{ settings.google_play }}" target="_blank" rel="noopener">Reservar quadra
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+          <a class="btn btn-outline" href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
+        </div>
       </div>
     </div>
     {% if promos.length %}

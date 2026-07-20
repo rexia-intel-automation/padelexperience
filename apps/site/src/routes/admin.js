@@ -428,7 +428,7 @@ const SETTINGS_FIELDS = [
   { key: 'instagram', label: 'Instagram', hint: '' },
   { key: 'email_parcerias', label: 'E-mail de parcerias', hint: '' },
   { key: 'regular_price', label: 'Preço regular (R$/hora/quadra)', hint: 'Ex.: 150,00' },
-  { key: 'regular_per_person', label: 'Referência por pessoa (regular)', hint: 'Ex.: 37,50' },
+  { key: 'regular_per_person', label: 'Preço por pessoa (regular)', hint: 'Ex.: 37,50' },
   { key: 'hours', label: 'Funcionamento', hint: '' },
   { key: 'location', label: 'Localização', hint: '' },
   { key: 'access_notes', label: 'Instruções de acesso', hint: 'Vazio = o card "Acesso" não aparece no site.' },

@@ -549,6 +549,11 @@ details.audit[open] summary{border-bottom:1px solid var(--border)}
   .price-card.featured img{min-height:180px;max-height:220px}
 }
 .promo-grid{margin-top:14px}
+.price-body .hero-actions{margin-top:14px}
+
+/* small labels need explicit colors on the tinted fact cards */
+.fact-card.accent small{color:#c2cede}
+.fact-card.highlight small{color:#344000}
 
 /* equipment rental is always billed per hour */
 .equipment-item strong .unit{font-size:13px;font-weight:500;color:var(--muted)}

@@ -186,7 +186,7 @@ async function seed() {
     // and promo cards are now toggled manually in the CMS.
     await run(
       'INSERT INTO promos (title, price, price_note, description, active, sort) VALUES (?, ?, ?, ?, 0, 1)',
-      ['Inauguração', '120,00', '/ hora / quadra', 'Referência divulgada: R$ 30,00 por pessoa.']
+      ['Inauguração', '120,00', '/ hora / quadra', 'Preço por pessoa: R$ 30,00.']
     );
   }
 
