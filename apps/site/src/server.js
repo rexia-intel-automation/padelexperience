@@ -52,7 +52,15 @@ app.use((req, res) => {
   res.status(404).render('public/404.njk', { title: 'Página não encontrada — Padel Experience' });
 });
 
-await init();
-app.listen(PORT, () => {
-  console.log(`Padel Experience rodando em http://localhost:${PORT}`);
-});
+// No top-level await: Hostinger's runner require()s the entry file, and
+// require() cannot load an ESM graph with TLA (ERR_REQUIRE_ASYNC_MODULE).
+init()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Padel Experience rodando em http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('DB init failed:', err);
+    process.exit(1);
+  });
