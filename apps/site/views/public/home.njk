@@ -92,7 +92,8 @@
       <div class="fact-card"><small>Atendimento</small><strong><a href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener">WhatsApp</a></strong><p><a href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener">Fale com a equipe</a> para dúvidas sobre reservas e acesso.</p></div>
       <div class="fact-card accent map">
         <div><small>Local</small><strong>Aeroporto Internacional de Brasília</strong><p>Estacionamento do bolsão "A". <a href="{{ settings.maps_url }}" target="_blank" rel="noopener">Abrir no Google Maps</a></p></div>
-        {% if settings.maps_embed %}<iframe src="{{ settings.maps_embed }}" title="Mapa — Padel Experience no Aeroporto de Brasília" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>{% endif %}
+        {# sandbox contains the Google Maps embed: allow-scripts + allow-same-origin (the embed needs both to render tiles), allow-popups + allow-popups-to-escape-sandbox so "View larger map"/directions open a real Maps tab. Deliberately omits allow-top-navigation and allow-forms — a hostile embed cannot hijack the page or post forms. #}
+        {% if settings.maps_embed %}<iframe src="{{ settings.maps_embed }}" title="Mapa — Padel Experience no Aeroporto de Brasília" loading="lazy" referrerpolicy="no-referrer-when-downgrade" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" allowfullscreen></iframe>{% endif %}
       </div>
     </div>
   </section>

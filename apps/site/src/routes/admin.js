@@ -45,6 +45,30 @@ function externalImageUrl(value) {
   return /^https?:\/\//.test(url) ? url : '';
 }
 
+// Validates operator-supplied Google Maps values before they reach the page.
+// maps_url feeds an "Abrir no Google Maps" link; maps_embed feeds an <iframe src>
+// that runs with scripts. Anything not https:// (javascript:, http:, data:, …) is
+// dropped to ''. For the embed we additionally require a Google Maps host, since
+// an arbitrary https origin in the iframe is still an untrusted frame. Returning
+// '' is safe: the template hides the link/map when the setting is empty.
+function safeMapsUrl(value, { embed = false } = {}) {
+  const raw = String(value ?? '').trim();
+  if (!raw) return '';
+  let url;
+  try {
+    url = new URL(raw);
+  } catch {
+    return '';
+  }
+  if (url.protocol !== 'https:') return '';
+  if (embed) {
+    const host = url.hostname.toLowerCase();
+    const ok = host === 'www.google.com' || host === 'google.com' || host === 'maps.google.com';
+    if (!ok) return '';
+  }
+  return raw;
+}
+
 // Converts an uploaded file to webp and stores it in the media table, deleting
 // the multer temp file afterwards. Returns the '/media/<id>' path.
 async function storeUploadAsMedia(file) {
@@ -529,8 +553,13 @@ router.get('/configuracoes', (req, res) => {
 
 router.post('/configuracoes', verifyCsrf, wrap(async (req, res) => {
   for (const field of SETTINGS_FIELDS) {
+    let value = String(req.body[field.key] ?? '');
+    // The only two settings that flow into an active surface (iframe / link) get
+    // scheme (and host, for the embed) validation; an invalid value saves as ''.
+    if (field.key === 'maps_embed') value = safeMapsUrl(value, { embed: true });
+    else if (field.key === 'maps_url') value = safeMapsUrl(value);
     await run('INSERT INTO settings (`key`, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = VALUES(value)', [
-      field.key, String(req.body[field.key] ?? ''),
+      field.key, value,
     ]);
   }
   res.redirect('/admin/configuracoes');

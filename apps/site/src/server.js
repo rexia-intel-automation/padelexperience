@@ -18,6 +18,11 @@ if (!process.env.SESSION_SECRET) {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
+// Behind Hostinger's reverse proxy: trust exactly one hop so req.ip reflects the
+// real client (X-Forwarded-For), not the proxy. Without this the login rate limit
+// (keyed on req.ip in auth.js) sees one shared proxy IP and becomes global.
+// Use 1 (single known proxy), never `true` (would trust any spoofed hop).
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 
 const nunjucksEnv = nunjucks.configure(path.join(__dirname, '..', 'views'), {
