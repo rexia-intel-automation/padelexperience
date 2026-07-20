@@ -17,7 +17,13 @@
   <div class="field">
     <label for="image">Imagem</label>
     {% if item %}<img class="form-thumb" src="{{ item.image }}" alt="Imagem atual">{% endif %}
-    <input class="input" type="file" id="image" name="image" accept="image/*" {{ '' if item else 'required' }}>
+    <input class="input" type="file" id="image" name="image" accept="image/*">
+    <small>Uploads são convertidos automaticamente para webp.</small>
+  </div>
+  <div class="field">
+    <label for="image_url">Imagem por link (URL)</label>
+    <input class="input" type="url" id="image_url" name="image_url" value="{{ item.image if item and item.image and item.image.startsWith('http') }}" placeholder="https://...">
+    <small>Alternativa ao upload: link direto para a imagem. Se um arquivo for enviado acima, ele tem prioridade.</small>
   </div>
   <div class="field">
     <label for="caption">Legenda</label>

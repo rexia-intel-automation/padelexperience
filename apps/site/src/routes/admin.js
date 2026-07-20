@@ -1,8 +1,10 @@
 // Admin CMS routes: auth, dashboard, equipment CRUD, partners CRUD, gallery CRUD, settings.
 import { Router } from 'express';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
 import path from 'node:path';
 import multer from 'multer';
+import sharp from 'sharp';
 import { db, uploadsDir } from '../db.js';
 import {
   verifyPassword,
@@ -32,10 +34,30 @@ const upload = multer({
   },
 });
 
-// Partner logos may also be provided as a direct link to the official source.
-function externalLogoUrl(value) {
+// Partner logos and gallery images may also be provided as a direct link to
+// an external source, as an alternative to uploading a file.
+function externalImageUrl(value) {
   const url = String(value || '').trim();
   return /^https?:\/\//.test(url) ? url : '';
+}
+
+// Converts an uploaded file to webp and stores it in the media table, deleting
+// the multer temp file afterwards. Returns the '/media/<id>' path.
+async function storeUploadAsMedia(file) {
+  const webp = await sharp(file.path).rotate().webp({ quality: 82 }).toBuffer();
+  await fs.promises.unlink(file.path);
+  const { lastInsertRowid } = db
+    .prepare('INSERT INTO media (mime, data) VALUES (?, ?)')
+    .run('image/webp', webp);
+  return `/media/${lastInsertRowid}`;
+}
+
+// Removes the media row behind a gallery image, if it was stored in the DB.
+function deleteMediaIfOwned(imagePath) {
+  if (typeof imagePath === 'string' && imagePath.startsWith('/media/')) {
+    const id = imagePath.slice('/media/'.length);
+    db.prepare('DELETE FROM media WHERE id = ?').run(id);
+  }
 }
 
 function notFound(res, message) {
@@ -187,7 +209,7 @@ router.post('/parceiros', upload.single('logo'), verifyCsrf, (req, res) => {
       error: 'Nome é obrigatório.',
     });
   }
-  const logo = req.file ? `/uploads/${req.file.filename}` : (externalLogoUrl(logo_url) || null);
+  const logo = req.file ? `/uploads/${req.file.filename}` : (externalImageUrl(logo_url) || null);
   db.prepare(
     'INSERT INTO partners (name, role, description, instagram_url, announcement_url, logo, sort) VALUES (?, ?, ?, ?, ?, ?, ?)'
   ).run(name.trim(), role, description, instagram_url, announcement_url, logo, Number(sort) || 0);
@@ -211,7 +233,7 @@ router.post('/parceiros/:id', upload.single('logo'), verifyCsrf, (req, res) => {
       error: 'Nome é obrigatório.',
     });
   }
-  const logo = req.file ? `/uploads/${req.file.filename}` : (externalLogoUrl(logo_url) || item.logo);
+  const logo = req.file ? `/uploads/${req.file.filename}` : (externalImageUrl(logo_url) || item.logo);
   db.prepare(
     'UPDATE partners SET name = ?, role = ?, description = ?, instagram_url = ?, announcement_url = ?, logo = ?, sort = ? WHERE id = ?'
   ).run(name.trim(), role, description, instagram_url, announcement_url, logo, Number(sort) || 0, item.id);
@@ -245,20 +267,34 @@ router.get('/galeria/novo', (req, res) => {
   res.render('admin/gallery-form.njk', { title: 'Nova imagem — Admin', item: null });
 });
 
-router.post('/galeria', upload.single('image'), verifyCsrf, (req, res) => {
-  if (!req.file) {
+router.post('/galeria', upload.single('image'), verifyCsrf, async (req, res) => {
+  const { caption = '', sort = 0, image_url = '' } = req.body;
+
+  let image;
+  if (req.file) {
+    try {
+      image = await storeUploadAsMedia(req.file);
+    } catch {
+      await fs.promises.unlink(req.file.path).catch(() => {});
+      return res.status(400).render('admin/gallery-form.njk', {
+        title: 'Nova imagem — Admin',
+        item: null,
+        error: 'Não foi possível processar o arquivo enviado. Verifique se é uma imagem válida.',
+      });
+    }
+  } else {
+    image = externalImageUrl(image_url);
+  }
+
+  if (!image) {
     return res.status(400).render('admin/gallery-form.njk', {
       title: 'Nova imagem — Admin',
       item: null,
-      error: 'Selecione uma imagem.',
+      error: 'Envie um arquivo de imagem ou informe uma URL.',
     });
   }
-  const { caption = '', sort = 0 } = req.body;
-  db.prepare('INSERT INTO gallery (image, caption, sort) VALUES (?, ?, ?)').run(
-    `/uploads/${req.file.filename}`,
-    caption,
-    Number(sort) || 0
-  );
+
+  db.prepare('INSERT INTO gallery (image, caption, sort) VALUES (?, ?, ?)').run(image, caption, Number(sort) || 0);
   res.redirect('/admin/galeria');
 });
 
@@ -268,11 +304,29 @@ router.get('/galeria/:id/editar', (req, res) => {
   res.render('admin/gallery-form.njk', { title: 'Editar imagem — Admin', item });
 });
 
-router.post('/galeria/:id', upload.single('image'), verifyCsrf, (req, res) => {
+router.post('/galeria/:id', upload.single('image'), verifyCsrf, async (req, res) => {
   const item = db.prepare('SELECT * FROM gallery WHERE id = ?').get(req.params.id);
   if (!item) return notFound(res, 'Imagem não encontrada.');
-  const { caption = '', sort = 0 } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : item.image;
+  const { caption = '', sort = 0, image_url = '' } = req.body;
+
+  let image = item.image;
+  if (req.file) {
+    try {
+      image = await storeUploadAsMedia(req.file);
+    } catch {
+      await fs.promises.unlink(req.file.path).catch(() => {});
+      return res.status(400).render('admin/gallery-form.njk', {
+        title: 'Editar imagem — Admin',
+        item,
+        error: 'Não foi possível processar o arquivo enviado. Verifique se é uma imagem válida.',
+      });
+    }
+    deleteMediaIfOwned(item.image);
+  } else if (externalImageUrl(image_url)) {
+    image = externalImageUrl(image_url);
+    deleteMediaIfOwned(item.image);
+  }
+
   db.prepare('UPDATE gallery SET image = ?, caption = ?, sort = ? WHERE id = ?').run(image, caption, Number(sort) || 0, item.id);
   res.redirect('/admin/galeria');
 });
@@ -289,6 +343,8 @@ router.get('/galeria/:id/excluir', (req, res) => {
 });
 
 router.post('/galeria/:id/excluir', verifyCsrf, (req, res) => {
+  const item = db.prepare('SELECT * FROM gallery WHERE id = ?').get(req.params.id);
+  if (item) deleteMediaIfOwned(item.image);
   db.prepare('DELETE FROM gallery WHERE id = ?').run(req.params.id);
   res.redirect('/admin/galeria');
 });

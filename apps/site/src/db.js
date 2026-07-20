@@ -56,6 +56,15 @@ db.exec(`
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL DEFAULT ''
   );
+
+  -- Gallery images uploaded via the admin, stored as webp bytes (no filesystem
+  -- dependency for the Hostinger deploy). Maps 1:1 to MySQL: BLOB -> LONGBLOB.
+  CREATE TABLE IF NOT EXISTS media (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mime TEXT NOT NULL,
+    data BLOB NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
 
 function placeholderImage(width, height, bg, label) {

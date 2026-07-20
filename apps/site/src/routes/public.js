@@ -4,6 +4,15 @@ import { db } from '../db.js';
 
 const router = Router();
 
+// Gallery images uploaded via the admin live in the media table, not on disk.
+router.get('/media/:id', (req, res) => {
+  const row = db.prepare('SELECT mime, data FROM media WHERE id = ?').get(req.params.id);
+  if (!row) return res.status(404).end();
+  res.set('Content-Type', row.mime);
+  res.set('Cache-Control', 'public, max-age=31536000, immutable');
+  res.send(row.data);
+});
+
 router.get('/', (req, res) => {
   const settings = res.locals.settings;
   const equipment = db.prepare('SELECT * FROM equipment ORDER BY sort ASC, id ASC').all();
