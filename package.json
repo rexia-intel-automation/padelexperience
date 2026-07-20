@@ -1,6 +1,7 @@
 {
   "name": "site-padelexp",
   "private": true,
+  "type": "module",
   "version": "1.0.0",
   "workspaces": [
     "apps/*"
