@@ -87,10 +87,13 @@
       <p>No estacionamento do bolsão "A" do Aeroporto Internacional de Brasília — para quem vive na cidade e para quem está de passagem.</p>
     </div>
     <div class="guide-summary grid-cols-{{ factCols }}">
-      <div class="fact-card accent"><small>Local</small><strong>Aeroporto Internacional de Brasília</strong><p>Estacionamento do bolsão "A".</p></div>
       <div class="fact-card highlight"><small>Funcionamento</small><strong>{{ settings.hours }}</strong><p>Jogue no horário que fizer sentido para você.</p></div>
       {% if settings.access_notes %}<div class="fact-card"><small>Acesso</small><strong>Como chegar</strong><p>{{ settings.access_notes }}</p></div>{% endif %}
-      <div class="fact-card"><small>Atendimento</small><strong>WhatsApp</strong><p><a href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener">Fale com a equipe</a> para dúvidas sobre reservas e acesso.</p></div>
+      <div class="fact-card"><small>Atendimento</small><strong><a href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener">WhatsApp</a></strong><p><a href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener">Fale com a equipe</a> para dúvidas sobre reservas e acesso.</p></div>
+      <div class="fact-card accent map">
+        <div><small>Local</small><strong>Aeroporto Internacional de Brasília</strong><p>Estacionamento do bolsão "A". <a href="{{ settings.maps_url }}" target="_blank" rel="noopener">Abrir no Google Maps</a></p></div>
+        {% if settings.maps_embed %}<iframe src="{{ settings.maps_embed }}" title="Mapa — Padel Experience no Aeroporto de Brasília" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>{% endif %}
+      </div>
     </div>
   </section>
 

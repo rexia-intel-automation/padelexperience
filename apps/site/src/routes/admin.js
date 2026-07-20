@@ -431,6 +431,8 @@ const SETTINGS_FIELDS = [
   { key: 'regular_per_person', label: 'Preço por pessoa (regular)', hint: 'Ex.: 37,50' },
   { key: 'hours', label: 'Funcionamento', hint: '' },
   { key: 'location', label: 'Localização', hint: '' },
+  { key: 'maps_url', label: 'Link do Google Maps', hint: 'Link de compartilhamento usado em "Abrir no Google Maps".' },
+  { key: 'maps_embed', label: 'URL de embed do mapa', hint: 'URL do iframe do mapa na seção Localização. Vazio = sem mapa.' },
   { key: 'access_notes', label: 'Instruções de acesso', hint: 'Vazio = o card "Acesso" não aparece no site.' },
 ];
 

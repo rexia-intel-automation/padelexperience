@@ -221,6 +221,8 @@ async function seed() {
     regular_per_person: '37,50',
     hours: 'Todos os dias • 24h',
     location: 'Aeroporto Internacional de Brasília — estacionamento do bolsão "A"',
+    maps_url: 'https://maps.app.goo.gl/5TSKJM8v6jGY8NJ48',
+    maps_embed: 'https://maps.google.com/maps?q=-15.869954,-47.923075&z=16&output=embed',
     access_notes: '',
     cancel_policy: '',
   };

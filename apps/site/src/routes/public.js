@@ -46,7 +46,7 @@ router.get('/', async (req, res, next) => {
       gallery,
       promos,
       promoCols: gridCols(promos.length),
-      factCols: gridCols(settings.access_notes ? 4 : 3),
+      factCols: gridCols(settings.access_notes ? 3 : 2),
       galleryCols: gridCols(gallery.length),
       priceImage: gallery.length ? gallery[0].image : '',
       bookingUrl,

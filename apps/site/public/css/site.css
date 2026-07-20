@@ -554,6 +554,11 @@ details.audit[open] summary{border-bottom:1px solid var(--border)}
 /* small labels need explicit colors on the tinted fact cards */
 .fact-card.accent small{color:#c2cede}
 .fact-card.highlight small{color:#344000}
+.fact-card a{text-decoration:underline;text-underline-offset:3px}
+
+/* location card with the embedded map spans the full row below the others */
+.fact-card.map{grid-column:1/-1}
+.fact-card.map iframe{width:100%;height:300px;border:0;border-radius:12px;margin-top:14px;display:block;background:var(--surface-2)}
 
 /* equipment rental is always billed per hour */
 .equipment-item strong .unit{font-size:13px;font-weight:500;color:var(--muted)}
