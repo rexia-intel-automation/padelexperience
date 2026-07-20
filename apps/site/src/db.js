@@ -26,6 +26,7 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   waitForConnections: true,
   connectionLimit: 5,
+  connectTimeout: 10000,
 });
 
 export async function all(sql, params = []) {
@@ -225,9 +226,6 @@ async function seed() {
     email_parcerias: 'parcerias@padelexperience.com.br',
     instagram: 'https://www.instagram.com/padel.exp',
     booking_url: '',
-    promo_price: '120,00',
-    promo_per_person: '30,00',
-    promo_ends: '2026-07-19',
     regular_price: '150,00',
     regular_per_person: '37,50',
     hours: 'Todos os dias • 24h',
@@ -235,7 +233,6 @@ async function seed() {
     maps_url: 'https://maps.app.goo.gl/5TSKJM8v6jGY8NJ48',
     maps_embed: 'https://maps.google.com/maps?q=-15.869954,-47.923075&z=16&output=embed',
     access_notes: '',
-    cancel_policy: '',
   };
   for (const [key, value] of Object.entries(settingsDefaults)) {
     await run('INSERT IGNORE INTO settings (`key`, value) VALUES (?, ?)', [key, value]);

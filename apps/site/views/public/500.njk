@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex">
+<title>Erro no servidor — Padel Experience</title>
+{# Deliberately self-contained: no layout extend and no settings/DB reads,
+   so this page still renders when the database layer is the thing that failed. #}
+<link rel="icon" href="/img/app-logo-positive.svg">
+<script>
+// Apply the saved/preferred theme before first paint to avoid a dark flash.
+(function(){try{var t=localStorage.getItem('px-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.dataset.theme=t}catch(e){}})();
+</script>
+<link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+<main>
+  <section class="shell section">
+    <div class="empty">
+      <div>
+        <div class="empty-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4.5M12 15.5h.01"/></svg>
+        </div>
+        <h3>Algo saiu do lugar.</h3>
+        <p>O servidor encontrou um erro ao montar esta página. Costuma ser passageiro — tente de novo em instantes.</p>
+        <a class="btn btn-primary" href="/">Voltar ao início</a>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

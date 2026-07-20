@@ -8,6 +8,7 @@ import sharp from 'sharp';
 import { all, get, run, uploadsDir } from '../db.js';
 import {
   verifyPassword,
+  dummyVerify,
   createSession,
   destroySession,
   requireAuth,
@@ -61,6 +62,12 @@ async function deleteMediaIfOwned(imagePath) {
   }
 }
 
+// Clamps a body field to a max length, tolerating array bodies (e.g. name=a&name=b).
+function field(v, max = 255) {
+  const s = Array.isArray(v) ? v[0] : v;
+  return String(s ?? '').trim().slice(0, max);
+}
+
 function notFound(res, message) {
   return res.status(404).render('admin/error.njk', { title: 'Não encontrado', message });
 }
@@ -84,7 +91,8 @@ router.post('/login', wrap(async (req, res) => {
   const { email, password } = req.body;
   const user = await get('SELECT * FROM users WHERE email = ?', [String(email || '').trim().toLowerCase()]);
 
-  if (!user || !verifyPassword(password || '', user.password_hash)) {
+  const ok = user ? verifyPassword(password || '', user.password_hash) : dummyVerify(password || '');
+  if (!ok) {
     return res.status(401).render('admin/login.njk', {
       title: 'Entrar — Admin Padel Experience',
       error: 'E-mail ou senha inválidos.',
@@ -136,7 +144,10 @@ router.get('/equipamentos/novo', (req, res) => {
 });
 
 router.post('/equipamentos', verifyCsrf, wrap(async (req, res) => {
-  const { name = '', description = '', price = '', sort = 0 } = req.body;
+  const name = field(req.body.name, 255);
+  const description = field(req.body.description, 65535);
+  const price = field(req.body.price, 64);
+  const sort = req.body.sort ?? 0;
   if (!name.trim()) {
     return res.status(400).render('admin/equipment-form.njk', {
       title: 'Novo equipamento — Admin',
@@ -159,7 +170,10 @@ router.get('/equipamentos/:id/editar', wrap(async (req, res) => {
 router.post('/equipamentos/:id', verifyCsrf, wrap(async (req, res) => {
   const item = await get('SELECT * FROM equipment WHERE id = ?', [req.params.id]);
   if (!item) return notFound(res, 'Equipamento não encontrado.');
-  const { name = '', description = '', price = '', sort = 0 } = req.body;
+  const name = field(req.body.name, 255);
+  const description = field(req.body.description, 65535);
+  const price = field(req.body.price, 64);
+  const sort = req.body.sort ?? 0;
   if (!name.trim()) {
     return res.status(400).render('admin/equipment-form.njk', {
       title: 'Editar equipamento — Admin',
@@ -201,7 +215,11 @@ router.get('/promocoes/novo', (req, res) => {
 });
 
 router.post('/promocoes', verifyCsrf, wrap(async (req, res) => {
-  const { title = '', price = '', price_note = '/ hora / quadra', description = '', sort = 0 } = req.body;
+  const title = field(req.body.title, 255);
+  const price = field(req.body.price, 64);
+  const price_note = req.body.price_note !== undefined ? field(req.body.price_note, 128) : '/ hora / quadra';
+  const description = field(req.body.description, 512);
+  const sort = req.body.sort ?? 0;
   if (!title.trim()) {
     return res.status(400).render('admin/promo-form.njk', {
       title: 'Nova promoção — Admin',
@@ -224,7 +242,11 @@ router.get('/promocoes/:id/editar', wrap(async (req, res) => {
 router.post('/promocoes/:id', verifyCsrf, wrap(async (req, res) => {
   const item = await get('SELECT * FROM promos WHERE id = ?', [req.params.id]);
   if (!item) return notFound(res, 'Promoção não encontrada.');
-  const { title = '', price = '', price_note = '/ hora / quadra', description = '', sort = 0 } = req.body;
+  const title = field(req.body.title, 255);
+  const price = field(req.body.price, 64);
+  const price_note = req.body.price_note !== undefined ? field(req.body.price_note, 128) : '/ hora / quadra';
+  const description = field(req.body.description, 512);
+  const sort = req.body.sort ?? 0;
   if (!title.trim()) {
     return res.status(400).render('admin/promo-form.njk', {
       title: 'Editar promoção — Admin',
@@ -266,15 +288,38 @@ router.get('/parceiros/novo', (req, res) => {
 });
 
 router.post('/parceiros', upload.single('logo'), verifyCsrf, wrap(async (req, res) => {
-  const { name = '', role = '', description = '', instagram_url = '', announcement_url = '', logo_url = '', sort = 0 } = req.body;
+  const name = field(req.body.name, 255);
+  const role = field(req.body.role, 255);
+  const description = field(req.body.description, 65535);
+  const instagram_url = field(req.body.instagram_url, 512);
+  const announcement_url = field(req.body.announcement_url, 512);
+  const logo_url = req.body.logo_url;
+  const sort = req.body.sort ?? 0;
   if (!name.trim()) {
+    if (req.file) await fs.promises.unlink(req.file.path).catch(() => {});
     return res.status(400).render('admin/partner-form.njk', {
       title: 'Novo parceiro — Admin',
       item: null,
       error: 'Nome é obrigatório.',
     });
   }
-  const logo = req.file ? `/uploads/${req.file.filename}` : (externalImageUrl(logo_url) || null);
+
+  let logo;
+  if (req.file) {
+    try {
+      logo = await storeUploadAsMedia(req.file);
+    } catch {
+      await fs.promises.unlink(req.file.path).catch(() => {});
+      return res.status(400).render('admin/partner-form.njk', {
+        title: 'Novo parceiro — Admin',
+        item: null,
+        error: 'Não foi possível processar o arquivo enviado. Verifique se é uma imagem válida.',
+      });
+    }
+  } else {
+    logo = externalImageUrl(logo_url) || null;
+  }
+
   await run(
     'INSERT INTO partners (name, role, description, instagram_url, announcement_url, logo, sort) VALUES (?, ?, ?, ?, ?, ?, ?)',
     [name.trim(), role, description, instagram_url, announcement_url, logo, Number(sort) || 0]
@@ -290,16 +335,44 @@ router.get('/parceiros/:id/editar', wrap(async (req, res) => {
 
 router.post('/parceiros/:id', upload.single('logo'), verifyCsrf, wrap(async (req, res) => {
   const item = await get('SELECT * FROM partners WHERE id = ?', [req.params.id]);
-  if (!item) return notFound(res, 'Parceiro não encontrado.');
-  const { name = '', role = '', description = '', instagram_url = '', announcement_url = '', logo_url = '', sort = 0 } = req.body;
+  if (!item) {
+    if (req.file) await fs.promises.unlink(req.file.path).catch(() => {});
+    return notFound(res, 'Parceiro não encontrado.');
+  }
+  const name = field(req.body.name, 255);
+  const role = field(req.body.role, 255);
+  const description = field(req.body.description, 65535);
+  const instagram_url = field(req.body.instagram_url, 512);
+  const announcement_url = field(req.body.announcement_url, 512);
+  const logo_url = req.body.logo_url;
+  const sort = req.body.sort ?? 0;
   if (!name.trim()) {
+    if (req.file) await fs.promises.unlink(req.file.path).catch(() => {});
     return res.status(400).render('admin/partner-form.njk', {
       title: 'Editar parceiro — Admin',
       item,
       error: 'Nome é obrigatório.',
     });
   }
-  const logo = req.file ? `/uploads/${req.file.filename}` : (externalImageUrl(logo_url) || item.logo);
+
+  let logo = item.logo;
+  if (req.file) {
+    try {
+      logo = await storeUploadAsMedia(req.file);
+    } catch {
+      await fs.promises.unlink(req.file.path).catch(() => {});
+      return res.status(400).render('admin/partner-form.njk', {
+        title: 'Editar parceiro — Admin',
+        item,
+        error: 'Não foi possível processar o arquivo enviado. Verifique se é uma imagem válida.',
+      });
+    }
+    await deleteMediaIfOwned(item.logo);
+  } else if (externalImageUrl(logo_url)) {
+    logo = externalImageUrl(logo_url);
+    await deleteMediaIfOwned(item.logo);
+  }
+
   await run(
     'UPDATE partners SET name = ?, role = ?, description = ?, instagram_url = ?, announcement_url = ?, logo = ?, sort = ? WHERE id = ?',
     [name.trim(), role, description, instagram_url, announcement_url, logo, Number(sort) || 0, item.id]
@@ -319,6 +392,8 @@ router.get('/parceiros/:id/excluir', wrap(async (req, res) => {
 }));
 
 router.post('/parceiros/:id/excluir', verifyCsrf, wrap(async (req, res) => {
+  const item = await get('SELECT * FROM partners WHERE id = ?', [req.params.id]);
+  if (item) await deleteMediaIfOwned(item.logo);
   await run('DELETE FROM partners WHERE id = ?', [req.params.id]);
   res.redirect('/admin/parceiros');
 }));
@@ -335,7 +410,9 @@ router.get('/galeria/novo', (req, res) => {
 });
 
 router.post('/galeria', upload.single('image'), verifyCsrf, wrap(async (req, res) => {
-  const { caption = '', sort = 0, image_url = '' } = req.body;
+  const caption = field(req.body.caption, 512);
+  const sort = req.body.sort ?? 0;
+  const image_url = req.body.image_url;
 
   let image;
   if (req.file) {
@@ -354,6 +431,7 @@ router.post('/galeria', upload.single('image'), verifyCsrf, wrap(async (req, res
   }
 
   if (!image) {
+    if (req.file) await fs.promises.unlink(req.file.path).catch(() => {});
     return res.status(400).render('admin/gallery-form.njk', {
       title: 'Nova imagem — Admin',
       item: null,
@@ -373,8 +451,13 @@ router.get('/galeria/:id/editar', wrap(async (req, res) => {
 
 router.post('/galeria/:id', upload.single('image'), verifyCsrf, wrap(async (req, res) => {
   const item = await get('SELECT * FROM gallery WHERE id = ?', [req.params.id]);
-  if (!item) return notFound(res, 'Imagem não encontrada.');
-  const { caption = '', sort = 0, image_url = '' } = req.body;
+  if (!item) {
+    if (req.file) await fs.promises.unlink(req.file.path).catch(() => {});
+    return notFound(res, 'Imagem não encontrada.');
+  }
+  const caption = field(req.body.caption, 512);
+  const sort = req.body.sort ?? 0;
+  const image_url = req.body.image_url;
 
   let image = item.image;
   if (req.file) {

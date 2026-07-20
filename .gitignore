@@ -3,3 +3,4 @@ apps/site/data/
 .env
 .env.*
 .DS_Store
+backups/

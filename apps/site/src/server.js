@@ -92,7 +92,17 @@ app.use((err, req, res, next) => {
       message: 'Não foi possível concluir a operação. Tente novamente.',
     });
   }
-  res.status(500).send('Erro interno do servidor.');
+  // public/500.njk is self-contained (does not read res.locals.settings), so it
+  // renders even when the error came from the settings/DB layer. Fall back to a
+  // plain response if the template render itself fails. res.render delivers a
+  // render error via callback, not a throw, so handle it there.
+  res.status(500).render('public/500.njk', { title: 'Erro — Padel Experience' }, (renderErr, html) => {
+    if (renderErr) {
+      console.error('500 page render failed:', renderErr);
+      return res.status(500).send('Erro interno do servidor.');
+    }
+    res.send(html);
+  });
 });
 
 // No top-level await: Hostinger's runner require()s the entry file, and

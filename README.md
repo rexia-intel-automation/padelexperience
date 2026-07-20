@@ -7,7 +7,7 @@ conteúdo. Projeto desenvolvido pela RexIA.
 ## Stack
 
 - **Monorepo** npm workspaces, **Node 22** (`.nvmrc`)
-- Um único app em `apps/site`: **Express + nunjucks (SSR) + better-sqlite3 + multer**
+- Um único app em `apps/site`: **Express + nunjucks (SSR) + MySQL (mysql2) + multer**
 - **Sem bundler e sem build step** — deliberado, para compatibilidade com o Node.js hosting
   nativo da Hostinger (deploy na conta do cliente)
 - Design system do cliente aplicado verbatim a partir do style guide
@@ -25,20 +25,21 @@ npm run dev     # ou npm start
 - Admin: http://localhost:3000/admin/login — credenciais em `apps/site/.env`
   (copie de `apps/site/.env.example`)
 
-O banco SQLite (`apps/site/data/site.db`) e a pasta de uploads são criados na primeira
-execução com seeds vindos do guia de conteúdo. Apagar o `.db` reseta os seeds.
+O banco é MySQL/MariaDB remoto (credenciais em `apps/site/.env`). O schema é criado no boot
+(`CREATE TABLE IF NOT EXISTS`) e os seeds do guia de conteúdo rodam uma única vez, controlados
+pela flag `content_seeded` no próprio banco.
 
 ## CMS
 
-Coleções: **Equipamentos** (locação), **Parceiros**, **Galeria** e **Configurações**
-(links, preços, vigência da promoção, textos operacionais).
+Coleções: **Equipamentos** (locação), **Promoções**, **Parceiros**, **Galeria** e
+**Configurações** (links, preços, textos operacionais).
 
 Regras de negócio herdadas do style guide:
 
-- O card de preço promocional sai do site automaticamente após a data `promo_ends`.
+- Cards de promoção são manuais: coleção **Promoções** no CMS, exibidos apenas com `active` marcado.
 - Parceiras são citadas como "parceira" ou pela função indicada — nunca "patrocinadora".
-- Conteúdo pendente de confirmação do cliente exibe **[A CONFIRMAR]** no site e no painel
-  (canal final de reserva, unidade de cobrança da locação, cancelamento, acesso).
+- Conteúdo pendente de confirmação do cliente é omitido no site público e listado como
+  pendência no painel (canal final de reserva, instruções de acesso etc.).
 
 ## Estrutura
 
@@ -47,7 +48,7 @@ apps/site/
 ├── src/            # server.js, db.js (schema + seeds), auth.js, routes/
 ├── views/          # nunjucks (layouts, public, admin)
 ├── public/         # css/site.css (design system verbatim + adições), js, img
-└── data/           # runtime: SQLite + uploads (gitignored)
+└── (banco MySQL remoto; imagens da galeria vivem na tabela media, servidas por /media/:id)
 reference/          # style guide do cliente, logos e links oficiais (fonte canônica)
 docs/               # wireframe inicial
 ```

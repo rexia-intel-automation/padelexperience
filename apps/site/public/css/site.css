@@ -627,3 +627,8 @@ html[data-theme="light"] .badge.highlight{color:color-mix(in srgb,var(--lime-500
 
 /* the #inicio anchor now lives on the hero section; keep it clear of the sticky topbar */
 .hero{scroll-margin-top:96px}
+
+/* equipment/partner names moved from h4 to h3 (heading semantics); re-apply the
+   guide sizing that targeted the old h4 tags */
+.equipment-item h3{font-size:17px;margin:0 0 4px}
+.partner-body h3{font-size:22px;margin:5px 0 8px;letter-spacing:-.025em}

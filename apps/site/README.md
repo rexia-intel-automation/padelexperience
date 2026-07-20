@@ -13,25 +13,27 @@ npm run dev     # ou npm start
 
 Acesse http://localhost:3000
 
-O banco SQLite (`data/site.db`) e a pasta de uploads (`data/uploads/`) são criados
-automaticamente na primeira execução, com seeds vindos do guia de conteúdo do style guide
-(`reference/padel-experience-style-guide(1).html`, seção "07 — Guia de conteúdo").
+O banco é MySQL/MariaDB remoto (credenciais `DB_*` em `.env`). O schema é criado no boot e os
+seeds — vindos do guia de conteúdo do style guide (`reference/padel-experience-style-guide(1).html`,
+seção "07 — Guia de conteúdo") — rodam uma única vez, controlados pela flag `content_seeded`.
+Imagens da galeria são armazenadas no banco (tabela `media`) e servidas por `/media/:id`.
 
 ## Admin
 
 http://localhost:3000/admin/login — credenciais do `.env` (sem `ADMIN_PASSWORD` definido, o seed gera uma senha aleatória e a imprime no console do primeiro start).
 
-Coleções: **Equipamentos** (locação), **Parceiros**, **Galeria** e **Configurações**
-(links, preços de reserva, vigência da promoção, textos operacionais).
+Coleções: **Equipamentos** (locação), **Promoções**, **Parceiros**, **Galeria** e
+**Configurações** (links, preços de reserva, textos operacionais).
 
-Regra de negócio importante: o card de preço promocional sai do site automaticamente
-quando a data atual passa de `promo_ends` (Configurações), como exige o style guide.
-Campos vazios marcados como pendentes exibem "[A CONFIRMAR]" no site e no painel.
+Regras de negócio: cards de promoção são manuais — só aparecem no site com `active`
+marcado (não há auto-hide por data). Campos pendentes de confirmação do cliente são
+omitidos no site público e listados como pendências no painel.
 
 ## Configuração
 
 Copie `.env.example` para `.env` e ajuste se necessário:
 
+- `DB_HOST` / `DB_PORT` / `DB_NAME` / `DB_USER` / `DB_PASSWORD` — conexão MySQL (obrigatórias)
 - `PORT` — porta do servidor (default 3000)
 - `SESSION_SECRET` — segredo usado para assinar o cookie de sessão do admin
 - `ADMIN_EMAIL` / `ADMIN_PASSWORD` — credenciais do usuário admin criado no seed

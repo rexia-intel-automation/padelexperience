@@ -8,7 +8,7 @@
       <h1>Jogue.<br><span>Viva.</span><br>Repita.</h1>
       <p>Espaço de padel voltado a jogadores, visitantes, conexões e experiências. Quadras abertas todos os dias, 24 horas, no Aeroporto Internacional de Brasília.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="{{ bookingUrl }}" data-reserve data-ios="{{ settings.app_store }}" data-android="{{ settings.google_play }}" target="_blank" rel="noopener">Reservar quadra
+        <a class="btn btn-primary" href="{{ bookingUrl }}" data-reserve {% if settings.booking_url %}data-has-booking="1" {% endif %}data-ios="{{ settings.app_store }}" data-android="{{ settings.google_play }}" target="_blank" rel="noopener">Reservar quadra
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
         </a>
         <a class="btn btn-outline" href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
@@ -42,7 +42,7 @@
         <div class="price">R$ {{ settings.regular_price }} <span>/ hora / quadra</span></div>
         <div class="per-person">Preço por pessoa: R$ {{ settings.regular_per_person }}.</div>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="{{ bookingUrl }}" data-reserve data-ios="{{ settings.app_store }}" data-android="{{ settings.google_play }}" target="_blank" rel="noopener">Reservar quadra
+          <a class="btn btn-primary" href="{{ bookingUrl }}" data-reserve {% if settings.booking_url %}data-has-booking="1" {% endif %}data-ios="{{ settings.app_store }}" data-android="{{ settings.google_play }}" target="_blank" rel="noopener">Reservar quadra
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
           </a>
           <a class="btn btn-outline" href="{{ settings.whatsapp_atendimento }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
@@ -72,7 +72,7 @@
       {% for item in equipment %}
       <div class="equipment-item">
         <div class="bar"></div>
-        <h4>{{ item.name }}</h4>
+        <h3>{{ item.name }}</h3>
         <p>{{ item.description }}</p>
         <strong>R$ {{ item.price }} <span class="unit">/ hora</span></strong>
       </div>
@@ -125,7 +125,7 @@
         {% if partner.logo %}<img src="{{ partner.logo }}" alt="{{ partner.name }}">{% endif %}
         <div class="partner-body">
           <span class="partner-role">{{ partner.role }}</span>
-          <h4>{{ partner.name }}</h4>
+          <h3>{{ partner.name }}</h3>
           <p>{{ partner.description }}</p>
           <div class="partner-links">
             {% if partner.instagram_url %}<a href="{{ partner.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
@@ -142,7 +142,7 @@
     <div class="cta">
       <div><span class="eyebrow">Pronto para jogar?</span><h3>Sua próxima partida começa aqui.</h3><p>Encontre um horário, convide seus parceiros e reserve a quadra sem atrito.</p></div>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="{{ bookingUrl }}" data-reserve data-ios="{{ settings.app_store }}" data-android="{{ settings.google_play }}" target="_blank" rel="noopener">Reservar quadra
+        <a class="btn btn-primary" href="{{ bookingUrl }}" data-reserve {% if settings.booking_url %}data-has-booking="1" {% endif %}data-ios="{{ settings.app_store }}" data-android="{{ settings.google_play }}" target="_blank" rel="noopener">Reservar quadra
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
         </a>
         <a class="btn btn-outline" href="{{ settings.app_store }}" target="_blank" rel="noopener">App Store</a>

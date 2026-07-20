@@ -1,5 +1,18 @@
 {% extends "layouts/admin.njk" %}
 {% block content %}
-<div class="admin-topbar"><h1>{{ title }}</h1></div>
-<div class="empty"><h3>{{ message }}</h3><a class="btn btn-outline" href="/admin">Voltar ao painel</a></div>
+<div class="admin-topbar">
+  <div>
+    <h1>{{ title }}</h1>
+    <p>Algo saiu do lugar no painel.</p>
+  </div>
+</div>
+<div class="empty">
+  <div>
+    <div class="empty-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4.5M12 15.5h.01"/></svg>
+    </div>
+    <h3>{{ message }}</h3>
+    <a class="btn btn-outline" href="/admin">Voltar ao painel</a>
+  </div>
+</div>
 {% endblock %}

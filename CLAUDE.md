@@ -39,5 +39,5 @@ Monorepo npm workspaces, Node 22 (`.nvmrc`), **um único app** em `apps/site`: E
 
 - Conteúdo visível em pt-BR (sem emoji); código e comentários em inglês.
 - Reserva de quadra acontece fora do site (app Matchpoint / WhatsApp enquanto `booking_url` estiver vazio) — o site nunca promete reserva própria.
-- Números e fatos: só o que está no guia de conteúdo ou confirmado pelo cliente; faltando, marcar `[A CONFIRMAR]`.
+- Números e fatos: só o que está no guia de conteúdo ou confirmado pelo cliente; faltando, omitir no site público e tratar como pendente de confirmação do cliente (o site não exibe placeholders).
 - Repo: https://github.com/rexia-intel-automation/padelexperience (público — nunca commitar credenciais; `apps/site/.env` é ignorado e o seed gera senha aleatória sem `ADMIN_PASSWORD`). Branches: `main` (estável) e `dev` (trabalho).
