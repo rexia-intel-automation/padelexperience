@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import multer from 'multer';
 import sharp from 'sharp';
-import { db, uploadsDir } from '../db.js';
+import { all, get, run, uploadsDir } from '../db.js';
 import {
   verifyPassword,
   createSession,
@@ -16,6 +16,9 @@ import {
 } from '../auth.js';
 
 const router = Router();
+
+// express 4 does not catch rejected promises from async handlers on its own
+const wrap = (fn) => (req, res, next) => fn(req, res, next).catch(next);
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -46,17 +49,15 @@ function externalImageUrl(value) {
 async function storeUploadAsMedia(file) {
   const webp = await sharp(file.path).rotate().webp({ quality: 82 }).toBuffer();
   await fs.promises.unlink(file.path);
-  const { lastInsertRowid } = db
-    .prepare('INSERT INTO media (mime, data) VALUES (?, ?)')
-    .run('image/webp', webp);
-  return `/media/${lastInsertRowid}`;
+  const { insertId } = await run('INSERT INTO media (mime, data) VALUES (?, ?)', ['image/webp', webp]);
+  return `/media/${insertId}`;
 }
 
 // Removes the media row behind a gallery image, if it was stored in the DB.
-function deleteMediaIfOwned(imagePath) {
+async function deleteMediaIfOwned(imagePath) {
   if (typeof imagePath === 'string' && imagePath.startsWith('/media/')) {
     const id = imagePath.slice('/media/'.length);
-    db.prepare('DELETE FROM media WHERE id = ?').run(id);
+    await run('DELETE FROM media WHERE id = ?', [id]);
   }
 }
 
@@ -71,7 +72,7 @@ router.get('/login', (req, res) => {
   res.render('admin/login.njk', { title: 'Entrar — Admin Padel Experience' });
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', wrap(async (req, res) => {
   const ip = req.ip || 'unknown';
   if (!checkRateLimit(ip)) {
     return res.status(429).render('admin/login.njk', {
@@ -81,7 +82,7 @@ router.post('/login', (req, res) => {
   }
 
   const { email, password } = req.body;
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(String(email || '').trim().toLowerCase());
+  const user = await get('SELECT * FROM users WHERE email = ?', [String(email || '').trim().toLowerCase()]);
 
   if (!user || !verifyPassword(password || '', user.password_hash)) {
     return res.status(401).render('admin/login.njk', {
@@ -93,7 +94,7 @@ router.post('/login', (req, res) => {
 
   createSession(res, user);
   return res.redirect('/admin');
-});
+}));
 
 router.post('/logout', requireAuth, (req, res) => {
   destroySession(res);
@@ -105,16 +106,16 @@ router.use(requireAuth);
 
 // ---------- dashboard ----------
 
-router.get('/', (req, res) => {
-  const equipmentCount = db.prepare('SELECT COUNT(*) AS n FROM equipment').get().n;
-  const partnerCount = db.prepare('SELECT COUNT(*) AS n FROM partners').get().n;
-  const galleryCount = db.prepare('SELECT COUNT(*) AS n FROM gallery').get().n;
+router.get('/', wrap(async (req, res) => {
+  const equipmentCount = (await get('SELECT COUNT(*) AS n FROM equipment')).n;
+  const partnerCount = (await get('SELECT COUNT(*) AS n FROM partners')).n;
+  const galleryCount = (await get('SELECT COUNT(*) AS n FROM gallery')).n;
   const settings = res.locals.settings;
   const pending = [];
   if (!settings.booking_url) pending.push('Canal final de reserva (CTA "Reservar quadra" usa o WhatsApp)');
   if (!settings.cancel_policy) pending.push('Regras de cancelamento');
   if (!settings.access_notes) pending.push('Instruções de acesso ao bolsão A');
-  const equipmentUnitPending = db.prepare("SELECT COUNT(*) AS n FROM equipment WHERE unit = ''").get().n;
+  const equipmentUnitPending = (await get("SELECT COUNT(*) AS n FROM equipment WHERE unit = ''")).n;
   if (equipmentUnitPending > 0) pending.push('Unidade de cobrança dos equipamentos');
 
   res.render('admin/dashboard.njk', {
@@ -124,20 +125,20 @@ router.get('/', (req, res) => {
     galleryCount,
     pending,
   });
-});
+}));
 
 // ---------- equipment (equipamentos) ----------
 
-router.get('/equipamentos', (req, res) => {
-  const items = db.prepare('SELECT * FROM equipment ORDER BY sort ASC, id ASC').all();
+router.get('/equipamentos', wrap(async (req, res) => {
+  const items = await all('SELECT * FROM equipment ORDER BY sort ASC, id ASC');
   res.render('admin/equipment-list.njk', { title: 'Equipamentos — Admin', items });
-});
+}));
 
 router.get('/equipamentos/novo', (req, res) => {
   res.render('admin/equipment-form.njk', { title: 'Novo equipamento — Admin', item: null });
 });
 
-router.post('/equipamentos', verifyCsrf, (req, res) => {
+router.post('/equipamentos', verifyCsrf, wrap(async (req, res) => {
   const { name = '', description = '', price = '', unit = '', sort = 0 } = req.body;
   if (!name.trim()) {
     return res.status(400).render('admin/equipment-form.njk', {
@@ -146,19 +147,20 @@ router.post('/equipamentos', verifyCsrf, (req, res) => {
       error: 'Nome é obrigatório.',
     });
   }
-  db.prepare('INSERT INTO equipment (name, description, price, unit, sort) VALUES (?, ?, ?, ?, ?)')
-    .run(name.trim(), description, price, unit, Number(sort) || 0);
+  await run('INSERT INTO equipment (name, description, price, unit, sort) VALUES (?, ?, ?, ?, ?)', [
+    name.trim(), description, price, unit, Number(sort) || 0,
+  ]);
   res.redirect('/admin/equipamentos');
-});
+}));
 
-router.get('/equipamentos/:id/editar', (req, res) => {
-  const item = db.prepare('SELECT * FROM equipment WHERE id = ?').get(req.params.id);
+router.get('/equipamentos/:id/editar', wrap(async (req, res) => {
+  const item = await get('SELECT * FROM equipment WHERE id = ?', [req.params.id]);
   if (!item) return notFound(res, 'Equipamento não encontrado.');
   res.render('admin/equipment-form.njk', { title: 'Editar equipamento — Admin', item });
-});
+}));
 
-router.post('/equipamentos/:id', verifyCsrf, (req, res) => {
-  const item = db.prepare('SELECT * FROM equipment WHERE id = ?').get(req.params.id);
+router.post('/equipamentos/:id', verifyCsrf, wrap(async (req, res) => {
+  const item = await get('SELECT * FROM equipment WHERE id = ?', [req.params.id]);
   if (!item) return notFound(res, 'Equipamento não encontrado.');
   const { name = '', description = '', price = '', unit = '', sort = 0 } = req.body;
   if (!name.trim()) {
@@ -168,13 +170,14 @@ router.post('/equipamentos/:id', verifyCsrf, (req, res) => {
       error: 'Nome é obrigatório.',
     });
   }
-  db.prepare('UPDATE equipment SET name = ?, description = ?, price = ?, unit = ?, sort = ? WHERE id = ?')
-    .run(name.trim(), description, price, unit, Number(sort) || 0, item.id);
+  await run('UPDATE equipment SET name = ?, description = ?, price = ?, unit = ?, sort = ? WHERE id = ?', [
+    name.trim(), description, price, unit, Number(sort) || 0, item.id,
+  ]);
   res.redirect('/admin/equipamentos');
-});
+}));
 
-router.get('/equipamentos/:id/excluir', (req, res) => {
-  const item = db.prepare('SELECT * FROM equipment WHERE id = ?').get(req.params.id);
+router.get('/equipamentos/:id/excluir', wrap(async (req, res) => {
+  const item = await get('SELECT * FROM equipment WHERE id = ?', [req.params.id]);
   if (!item) return notFound(res, 'Equipamento não encontrado.');
   res.render('admin/confirm-delete.njk', {
     title: 'Excluir equipamento — Admin',
@@ -182,25 +185,25 @@ router.get('/equipamentos/:id/excluir', (req, res) => {
     actionUrl: `/admin/equipamentos/${item.id}/excluir`,
     backUrl: '/admin/equipamentos',
   });
-});
+}));
 
-router.post('/equipamentos/:id/excluir', verifyCsrf, (req, res) => {
-  db.prepare('DELETE FROM equipment WHERE id = ?').run(req.params.id);
+router.post('/equipamentos/:id/excluir', verifyCsrf, wrap(async (req, res) => {
+  await run('DELETE FROM equipment WHERE id = ?', [req.params.id]);
   res.redirect('/admin/equipamentos');
-});
+}));
 
 // ---------- partners (parceiros) ----------
 
-router.get('/parceiros', (req, res) => {
-  const items = db.prepare('SELECT * FROM partners ORDER BY sort ASC, id ASC').all();
+router.get('/parceiros', wrap(async (req, res) => {
+  const items = await all('SELECT * FROM partners ORDER BY sort ASC, id ASC');
   res.render('admin/partner-list.njk', { title: 'Parceiros — Admin', items });
-});
+}));
 
 router.get('/parceiros/novo', (req, res) => {
   res.render('admin/partner-form.njk', { title: 'Novo parceiro — Admin', item: null });
 });
 
-router.post('/parceiros', upload.single('logo'), verifyCsrf, (req, res) => {
+router.post('/parceiros', upload.single('logo'), verifyCsrf, wrap(async (req, res) => {
   const { name = '', role = '', description = '', instagram_url = '', announcement_url = '', logo_url = '', sort = 0 } = req.body;
   if (!name.trim()) {
     return res.status(400).render('admin/partner-form.njk', {
@@ -210,20 +213,21 @@ router.post('/parceiros', upload.single('logo'), verifyCsrf, (req, res) => {
     });
   }
   const logo = req.file ? `/uploads/${req.file.filename}` : (externalImageUrl(logo_url) || null);
-  db.prepare(
-    'INSERT INTO partners (name, role, description, instagram_url, announcement_url, logo, sort) VALUES (?, ?, ?, ?, ?, ?, ?)'
-  ).run(name.trim(), role, description, instagram_url, announcement_url, logo, Number(sort) || 0);
+  await run(
+    'INSERT INTO partners (name, role, description, instagram_url, announcement_url, logo, sort) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [name.trim(), role, description, instagram_url, announcement_url, logo, Number(sort) || 0]
+  );
   res.redirect('/admin/parceiros');
-});
+}));
 
-router.get('/parceiros/:id/editar', (req, res) => {
-  const item = db.prepare('SELECT * FROM partners WHERE id = ?').get(req.params.id);
+router.get('/parceiros/:id/editar', wrap(async (req, res) => {
+  const item = await get('SELECT * FROM partners WHERE id = ?', [req.params.id]);
   if (!item) return notFound(res, 'Parceiro não encontrado.');
   res.render('admin/partner-form.njk', { title: 'Editar parceiro — Admin', item });
-});
+}));
 
-router.post('/parceiros/:id', upload.single('logo'), verifyCsrf, (req, res) => {
-  const item = db.prepare('SELECT * FROM partners WHERE id = ?').get(req.params.id);
+router.post('/parceiros/:id', upload.single('logo'), verifyCsrf, wrap(async (req, res) => {
+  const item = await get('SELECT * FROM partners WHERE id = ?', [req.params.id]);
   if (!item) return notFound(res, 'Parceiro não encontrado.');
   const { name = '', role = '', description = '', instagram_url = '', announcement_url = '', logo_url = '', sort = 0 } = req.body;
   if (!name.trim()) {
@@ -234,14 +238,15 @@ router.post('/parceiros/:id', upload.single('logo'), verifyCsrf, (req, res) => {
     });
   }
   const logo = req.file ? `/uploads/${req.file.filename}` : (externalImageUrl(logo_url) || item.logo);
-  db.prepare(
-    'UPDATE partners SET name = ?, role = ?, description = ?, instagram_url = ?, announcement_url = ?, logo = ?, sort = ? WHERE id = ?'
-  ).run(name.trim(), role, description, instagram_url, announcement_url, logo, Number(sort) || 0, item.id);
+  await run(
+    'UPDATE partners SET name = ?, role = ?, description = ?, instagram_url = ?, announcement_url = ?, logo = ?, sort = ? WHERE id = ?',
+    [name.trim(), role, description, instagram_url, announcement_url, logo, Number(sort) || 0, item.id]
+  );
   res.redirect('/admin/parceiros');
-});
+}));
 
-router.get('/parceiros/:id/excluir', (req, res) => {
-  const item = db.prepare('SELECT * FROM partners WHERE id = ?').get(req.params.id);
+router.get('/parceiros/:id/excluir', wrap(async (req, res) => {
+  const item = await get('SELECT * FROM partners WHERE id = ?', [req.params.id]);
   if (!item) return notFound(res, 'Parceiro não encontrado.');
   res.render('admin/confirm-delete.njk', {
     title: 'Excluir parceiro — Admin',
@@ -249,25 +254,25 @@ router.get('/parceiros/:id/excluir', (req, res) => {
     actionUrl: `/admin/parceiros/${item.id}/excluir`,
     backUrl: '/admin/parceiros',
   });
-});
+}));
 
-router.post('/parceiros/:id/excluir', verifyCsrf, (req, res) => {
-  db.prepare('DELETE FROM partners WHERE id = ?').run(req.params.id);
+router.post('/parceiros/:id/excluir', verifyCsrf, wrap(async (req, res) => {
+  await run('DELETE FROM partners WHERE id = ?', [req.params.id]);
   res.redirect('/admin/parceiros');
-});
+}));
 
 // ---------- gallery (galeria) ----------
 
-router.get('/galeria', (req, res) => {
-  const items = db.prepare('SELECT * FROM gallery ORDER BY sort ASC, id ASC').all();
+router.get('/galeria', wrap(async (req, res) => {
+  const items = await all('SELECT * FROM gallery ORDER BY sort ASC, id ASC');
   res.render('admin/gallery-list.njk', { title: 'Galeria — Admin', items });
-});
+}));
 
 router.get('/galeria/novo', (req, res) => {
   res.render('admin/gallery-form.njk', { title: 'Nova imagem — Admin', item: null });
 });
 
-router.post('/galeria', upload.single('image'), verifyCsrf, async (req, res) => {
+router.post('/galeria', upload.single('image'), verifyCsrf, wrap(async (req, res) => {
   const { caption = '', sort = 0, image_url = '' } = req.body;
 
   let image;
@@ -294,18 +299,18 @@ router.post('/galeria', upload.single('image'), verifyCsrf, async (req, res) => 
     });
   }
 
-  db.prepare('INSERT INTO gallery (image, caption, sort) VALUES (?, ?, ?)').run(image, caption, Number(sort) || 0);
+  await run('INSERT INTO gallery (image, caption, sort) VALUES (?, ?, ?)', [image, caption, Number(sort) || 0]);
   res.redirect('/admin/galeria');
-});
+}));
 
-router.get('/galeria/:id/editar', (req, res) => {
-  const item = db.prepare('SELECT * FROM gallery WHERE id = ?').get(req.params.id);
+router.get('/galeria/:id/editar', wrap(async (req, res) => {
+  const item = await get('SELECT * FROM gallery WHERE id = ?', [req.params.id]);
   if (!item) return notFound(res, 'Imagem não encontrada.');
   res.render('admin/gallery-form.njk', { title: 'Editar imagem — Admin', item });
-});
+}));
 
-router.post('/galeria/:id', upload.single('image'), verifyCsrf, async (req, res) => {
-  const item = db.prepare('SELECT * FROM gallery WHERE id = ?').get(req.params.id);
+router.post('/galeria/:id', upload.single('image'), verifyCsrf, wrap(async (req, res) => {
+  const item = await get('SELECT * FROM gallery WHERE id = ?', [req.params.id]);
   if (!item) return notFound(res, 'Imagem não encontrada.');
   const { caption = '', sort = 0, image_url = '' } = req.body;
 
@@ -321,18 +326,18 @@ router.post('/galeria/:id', upload.single('image'), verifyCsrf, async (req, res)
         error: 'Não foi possível processar o arquivo enviado. Verifique se é uma imagem válida.',
       });
     }
-    deleteMediaIfOwned(item.image);
+    await deleteMediaIfOwned(item.image);
   } else if (externalImageUrl(image_url)) {
     image = externalImageUrl(image_url);
-    deleteMediaIfOwned(item.image);
+    await deleteMediaIfOwned(item.image);
   }
 
-  db.prepare('UPDATE gallery SET image = ?, caption = ?, sort = ? WHERE id = ?').run(image, caption, Number(sort) || 0, item.id);
+  await run('UPDATE gallery SET image = ?, caption = ?, sort = ? WHERE id = ?', [image, caption, Number(sort) || 0, item.id]);
   res.redirect('/admin/galeria');
-});
+}));
 
-router.get('/galeria/:id/excluir', (req, res) => {
-  const item = db.prepare('SELECT * FROM gallery WHERE id = ?').get(req.params.id);
+router.get('/galeria/:id/excluir', wrap(async (req, res) => {
+  const item = await get('SELECT * FROM gallery WHERE id = ?', [req.params.id]);
   if (!item) return notFound(res, 'Imagem não encontrada.');
   res.render('admin/confirm-delete.njk', {
     title: 'Excluir imagem — Admin',
@@ -340,14 +345,14 @@ router.get('/galeria/:id/excluir', (req, res) => {
     actionUrl: `/admin/galeria/${item.id}/excluir`,
     backUrl: '/admin/galeria',
   });
-});
+}));
 
-router.post('/galeria/:id/excluir', verifyCsrf, (req, res) => {
-  const item = db.prepare('SELECT * FROM gallery WHERE id = ?').get(req.params.id);
-  if (item) deleteMediaIfOwned(item.image);
-  db.prepare('DELETE FROM gallery WHERE id = ?').run(req.params.id);
+router.post('/galeria/:id/excluir', verifyCsrf, wrap(async (req, res) => {
+  const item = await get('SELECT * FROM gallery WHERE id = ?', [req.params.id]);
+  if (item) await deleteMediaIfOwned(item.image);
+  await run('DELETE FROM gallery WHERE id = ?', [req.params.id]);
   res.redirect('/admin/galeria');
-});
+}));
 
 // ---------- settings (configurações) ----------
 
@@ -379,15 +384,13 @@ router.get('/configuracoes', (req, res) => {
   });
 });
 
-router.post('/configuracoes', verifyCsrf, (req, res) => {
-  const update = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value');
-  const tx = db.transaction(() => {
-    for (const field of SETTINGS_FIELDS) {
-      update.run(field.key, String(req.body[field.key] ?? ''));
-    }
-  });
-  tx();
+router.post('/configuracoes', verifyCsrf, wrap(async (req, res) => {
+  for (const field of SETTINGS_FIELDS) {
+    await run('INSERT INTO settings (`key`, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = VALUES(value)', [
+      field.key, String(req.body[field.key] ?? ''),
+    ]);
+  }
   res.redirect('/admin/configuracoes');
-});
+}));
 
 export default router;

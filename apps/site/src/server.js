@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import nunjucks from 'nunjucks';
-import { getSettings, uploadsDir } from './db.js';
+import { init, getSettings, uploadsDir } from './db.js';
 import publicRoutes from './routes/public.js';
 import adminRoutes from './routes/admin.js';
 
@@ -35,8 +35,12 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/uploads', express.static(uploadsDir));
 
 // settings + current path available to every view (dock active state, footer links)
-app.use((req, res, next) => {
-  res.locals.settings = getSettings();
+app.use(async (req, res, next) => {
+  try {
+    res.locals.settings = await getSettings();
+  } catch (err) {
+    return next(err);
+  }
   res.locals.currentPath = req.path;
   next();
 });
@@ -48,6 +52,7 @@ app.use((req, res) => {
   res.status(404).render('public/404.njk', { title: 'Página não encontrada — Padel Experience' });
 });
 
+await init();
 app.listen(PORT, () => {
   console.log(`Padel Experience rodando em http://localhost:${PORT}`);
 });

@@ -1,71 +1,92 @@
-// SQLite setup: schema creation + seeds, run once at startup.
+// MySQL setup (Hostinger): pool + schema creation + seeds, run once at startup.
 // Content model follows the style guide "07 — Guia de conteúdo" (facts only, pending items stay empty).
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import Database from 'better-sqlite3';
+import mysql from 'mysql2/promise';
 import { hashPassword } from './auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(__dirname, '..', 'data');
 const uploadsDir = path.join(dataDir, 'uploads');
 
+// multer still writes temp files here before sharp converts them to webp
 fs.mkdirSync(uploadsDir, { recursive: true });
 
-export const db = new Database(path.join(dataDir, 'site.db'));
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+for (const name of ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD']) {
+  if (!process.env[name]) throw new Error(`Missing required env var ${name} (see .env)`);
+}
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE NOT NULL,
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT) || 3306,
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  waitForConnections: true,
+  connectionLimit: 5,
+});
+
+export async function all(sql, params = []) {
+  const [rows] = await pool.query(sql, params);
+  return rows;
+}
+
+export async function get(sql, params = []) {
+  const [rows] = await pool.query(sql, params);
+  return rows[0];
+}
+
+export async function run(sql, params = []) {
+  const [result] = await pool.query(sql, params);
+  return result;
+}
+
+const SCHEMA = [
+  `CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS equipment (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    description TEXT NOT NULL DEFAULT '',
-    price TEXT NOT NULL DEFAULT '',
-    unit TEXT NOT NULL DEFAULT '',
-    sort INTEGER NOT NULL DEFAULT 0
-  );
-
-  CREATE TABLE IF NOT EXISTS partners (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT '',
-    description TEXT NOT NULL DEFAULT '',
-    instagram_url TEXT NOT NULL DEFAULT '',
-    announcement_url TEXT NOT NULL DEFAULT '',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS equipment (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    price VARCHAR(64) NOT NULL DEFAULT '',
+    unit VARCHAR(64) NOT NULL DEFAULT '',
+    sort INT NOT NULL DEFAULT 0
+  )`,
+  `CREATE TABLE IF NOT EXISTS partners (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    role VARCHAR(255) NOT NULL DEFAULT '',
+    description TEXT NOT NULL,
+    instagram_url VARCHAR(512) NOT NULL DEFAULT '',
+    announcement_url VARCHAR(512) NOT NULL DEFAULT '',
     logo TEXT,
-    sort INTEGER NOT NULL DEFAULT 0
-  );
-
-  CREATE TABLE IF NOT EXISTS gallery (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sort INT NOT NULL DEFAULT 0
+  )`,
+  `CREATE TABLE IF NOT EXISTS gallery (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     image TEXT NOT NULL,
-    caption TEXT NOT NULL DEFAULT '',
-    sort INTEGER NOT NULL DEFAULT 0
-  );
-
-  CREATE TABLE IF NOT EXISTS settings (
-    key TEXT PRIMARY KEY,
-    value TEXT NOT NULL DEFAULT ''
-  );
-
-  -- Gallery images uploaded via the admin, stored as webp bytes (no filesystem
-  -- dependency for the Hostinger deploy). Maps 1:1 to MySQL: BLOB -> LONGBLOB.
-  CREATE TABLE IF NOT EXISTS media (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    mime TEXT NOT NULL,
-    data BLOB NOT NULL,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-`);
+    caption VARCHAR(512) NOT NULL DEFAULT '',
+    sort INT NOT NULL DEFAULT 0
+  )`,
+  `CREATE TABLE IF NOT EXISTS settings (
+    \`key\` VARCHAR(191) PRIMARY KEY,
+    value TEXT NOT NULL
+  )`,
+  // Gallery images uploaded via the admin, stored as webp bytes (no filesystem
+  // dependency: Hostinger redeploys wipe the app dir, the DB persists).
+  `CREATE TABLE IF NOT EXISTS media (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    mime VARCHAR(64) NOT NULL,
+    data LONGBLOB NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`,
+];
 
 function placeholderImage(width, height, bg, label) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`
@@ -77,8 +98,8 @@ function placeholderImage(width, height, bg, label) {
 
 // ---------- seeds (run once, only when tables are empty) ----------
 
-function seed() {
-  const userCount = db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
+async function seed() {
+  const userCount = (await get('SELECT COUNT(*) AS n FROM users')).n;
   if (userCount === 0) {
     const email = process.env.ADMIN_EMAIL || 'admin@padelexperience.com.br';
     // No hardcoded fallback: without ADMIN_PASSWORD a random one is generated and
@@ -88,23 +109,24 @@ function seed() {
       password = crypto.randomBytes(9).toString('base64url');
       console.log(`[seed] ADMIN_PASSWORD não definido no .env — senha gerada para ${email}: ${password}`);
     }
-    db.prepare('INSERT INTO users (email, password_hash) VALUES (?, ?)').run(email, hashPassword(password));
+    await run('INSERT INTO users (email, password_hash) VALUES (?, ?)', [email, hashPassword(password)]);
   }
 
-  const equipmentCount = db.prepare('SELECT COUNT(*) AS n FROM equipment').get().n;
+  const equipmentCount = (await get('SELECT COUNT(*) AS n FROM equipment')).n;
   if (equipmentCount === 0) {
     const items = [
       { name: 'Raquete iniciante', description: 'Modelos Adidas Match', price: '25,00', unit: '', sort: 1 },
       { name: 'Raquete profissional', description: 'Modelos Adidas Performance', price: '90,00', unit: '', sort: 2 },
       { name: 'Tubo de bolas', description: 'Adidas Padel', price: '10,00', unit: '', sort: 3 },
     ];
-    const insert = db.prepare(
-      'INSERT INTO equipment (name, description, price, unit, sort) VALUES (@name, @description, @price, @unit, @sort)'
-    );
-    for (const item of items) insert.run(item);
+    for (const item of items) {
+      await run('INSERT INTO equipment (name, description, price, unit, sort) VALUES (?, ?, ?, ?, ?)', [
+        item.name, item.description, item.price, item.unit, item.sort,
+      ]);
+    }
   }
 
-  const partnerCount = db.prepare('SELECT COUNT(*) AS n FROM partners').get().n;
+  const partnerCount = (await get('SELECT COUNT(*) AS n FROM partners')).n;
   if (partnerCount === 0) {
     const partners = [
       {
@@ -140,14 +162,15 @@ function seed() {
         sort: 4,
       },
     ];
-    const insert = db.prepare(
-      'INSERT INTO partners (name, role, description, instagram_url, announcement_url, logo, sort) '
-      + 'VALUES (@name, @role, @description, @instagram_url, @announcement_url, NULL, @sort)'
-    );
-    for (const partner of partners) insert.run(partner);
+    for (const partner of partners) {
+      await run(
+        'INSERT INTO partners (name, role, description, instagram_url, announcement_url, logo, sort) VALUES (?, ?, ?, ?, ?, NULL, ?)',
+        [partner.name, partner.role, partner.description, partner.instagram_url, partner.announcement_url, partner.sort]
+      );
+    }
   }
 
-  const galleryCount = db.prepare('SELECT COUNT(*) AS n FROM gallery').get().n;
+  const galleryCount = (await get('SELECT COUNT(*) AS n FROM gallery')).n;
   if (galleryCount === 0) {
     const items = [
       { image: placeholderImage(900, 700, '#062b5b', 'Quadras'), caption: 'Quadras — estacionamento do bolsão A', sort: 1 },
@@ -155,8 +178,9 @@ function seed() {
       { image: placeholderImage(900, 700, '#020a16', 'Estrutura'), caption: 'Estrutura do espaço', sort: 3 },
       { image: placeholderImage(900, 700, '#062b5b', 'Vista noturna'), caption: 'Operação todos os dias, 24 horas', sort: 4 },
     ];
-    const insert = db.prepare('INSERT INTO gallery (image, caption, sort) VALUES (@image, @caption, @sort)');
-    for (const item of items) insert.run(item);
+    for (const item of items) {
+      await run('INSERT INTO gallery (image, caption, sort) VALUES (?, ?, ?)', [item.image, item.caption, item.sort]);
+    }
   }
 
   // Values below come from the style guide content section; empty values are pending
@@ -180,16 +204,18 @@ function seed() {
     access_notes: '',
     cancel_policy: '',
   };
-  const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
   for (const [key, value] of Object.entries(settingsDefaults)) {
-    insertSetting.run(key, value);
+    await run('INSERT IGNORE INTO settings (`key`, value) VALUES (?, ?)', [key, value]);
   }
 }
 
-seed();
+export async function init() {
+  for (const ddl of SCHEMA) await run(ddl);
+  await seed();
+}
 
-export function getSettings() {
-  const rows = db.prepare('SELECT key, value FROM settings').all();
+export async function getSettings() {
+  const rows = await all('SELECT `key`, value FROM settings');
   const settings = {};
   for (const row of rows) settings[row.key] = row.value;
   return settings;

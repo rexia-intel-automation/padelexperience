@@ -14,13 +14,14 @@ npm run dev     # sobe http://localhost:3000 com --watch
 npm start       # idem, sem watch
 ```
 
-Admin: `http://localhost:3000/admin/login` — credenciais em `apps/site/.env` (não versionado; sem `ADMIN_PASSWORD` o seed gera uma senha aleatória e imprime no console do primeiro start). Não há testes automatizados; verificação é manual/via curl (rotas: `/`, `/admin/login`, `/admin`).
+Admin: `http://localhost:3000/admin/login` — credenciais em `apps/site/.env` (não versionado; sem `ADMIN_PASSWORD` o seed gera uma senha aleatória e imprime no console do primeiro start — o seed só roda com o banco vazio). Não há testes automatizados; verificação é manual/via curl (rotas: `/`, `/admin/login`, `/admin`).
 
 ## Arquitetura
 
-Monorepo npm workspaces, Node 22 (`.nvmrc`), **um único app** em `apps/site`: Express + nunjucks (SSR) + better-sqlite3, sem bundler e sem build step — deliberado, para compatibilidade com o Node.js hosting nativo da Hostinger (deploy futuro na conta do cliente; `padelexperience.com.br` NÃO está na conta Hostinger da RexIA).
+Monorepo npm workspaces, Node 22 (`.nvmrc`), **um único app** em `apps/site`: Express + nunjucks (SSR) + MySQL (mysql2), sem bundler e sem build step — deliberado, para compatibilidade com o Node.js hosting nativo da Hostinger (deploy futuro na conta do cliente; `padelexperience.com.br` NÃO está na conta Hostinger da RexIA).
 
-- `src/server.js` — entrypoint; `src/db.js` — schema + seeds (roda na 1ª execução; DB em `apps/site/data/site.db`, gitignored — apagar o arquivo reseta os seeds); `src/auth.js` — scrypt + cookie assinado + CSRF + rate limit; `src/routes/{public,admin}.js`.
+- `src/server.js` — entrypoint (`server.js` na raiz do repo é só o shim que o preset Express da Hostinger exige); `src/db.js` — pool mysql2 + schema + seeds (CREATE TABLE IF NOT EXISTS + seed quando vazio, no boot); `src/auth.js` — scrypt + cookie assinado + CSRF + rate limit; `src/routes/{public,admin}.js`.
+- Banco: MySQL/MariaDB remoto da Hostinger — env vars `DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD` obrigatórias em `apps/site/.env` (dev local usa o MESMO banco do staging; credenciais e conexão SSH do staging em `apps/site/.env.staging`, ambos gitignored). Uploads da galeria viram webp (sharp) e vivem na tabela `media` (LONGBLOB), servidos por `/media/:id` — nada de imagem no filesystem; o banco sobrevive aos redeploys (que apagam o dir do app, ver `scripts/staging-sync-env.sh`).
 - Site público é **one-page** (`/` com âncoras `#inicio #reservas #equipamentos #localizacao #experiencia #parceiros`) seguindo a "arquitetura de conteúdo recomendada" do style guide. Navegação principal = **dock** flutuante (scroll-spy via IntersectionObserver em `public/js/main.js`).
 - CMS (`/admin`): coleções equipment, partners, gallery + settings (chave/valor). Conteúdo aparece no site imediatamente (SSR lê o banco a cada request).
 
