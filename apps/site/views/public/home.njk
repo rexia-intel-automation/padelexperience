@@ -1,8 +1,8 @@
 {% extends "layouts/public.njk" %}
 {% block content %}
 
-<main id="inicio">
-  <section class="shell hero">
+<main>
+  <section class="shell hero" id="inicio">
     <div>
       <span class="eyebrow">Aeroporto de Brasília — bolsão A</span>
       <h1>Jogue.<br><span>Viva.</span><br>Repita.</h1>
@@ -33,7 +33,7 @@
   <section class="section shell" id="reservas">
     <div class="section-head">
       <div><span class="eyebrow">01 — Reservas</span><h2>Reserve sua quadra</h2></div>
-      <p>Valor por hora e por quadra, com referência de divisão por pessoa. Encontre um horário, convide seus parceiros e entre em quadra.</p>
+      <p>Valor por hora e por quadra, com preço por pessoa de referência. Encontre um horário, convide seus parceiros e entre em quadra.</p>
     </div>
     <div class="price-card featured">
       {% if priceImage %}<img src="{{ priceImage }}" alt="Quadras do Padel Experience">{% endif %}

@@ -7,6 +7,11 @@
 <title>{{ title }}</title>
 <meta name="description" content="{{ metaDescription or 'Padel Experience — padel no Aeroporto Internacional de Brasília, todos os dias, 24 horas.' }}">
 <link rel="icon" href="/img/app-logo-positive.svg">
+<script>
+// Apply the saved/preferred theme before first paint to avoid a dark flash
+// (main.js repeats this later, harmlessly).
+(function(){try{var t=localStorage.getItem('px-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.dataset.theme=t}catch(e){}})();
+</script>
 <link rel="stylesheet" href="/css/site.css">
 </head>
 <body>

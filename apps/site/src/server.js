@@ -4,10 +4,17 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import nunjucks from 'nunjucks';
 import { init, getSettings, uploadsDir } from './db.js';
 import publicRoutes from './routes/public.js';
 import adminRoutes from './routes/admin.js';
+
+// Fail fast: signed cookies (admin session) must never fall back to a public
+// hardcoded secret. Same spirit as the DB_* checks in db.js.
+if (!process.env.SESSION_SECRET) {
+  throw new Error('Missing required env var SESSION_SECRET (see .env)');
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -28,9 +35,31 @@ nunjucksEnv.addFilter('shortdate', (value) => {
   return year && month && day ? `${day}/${month}/${year}` : isoDate;
 });
 
+// Security headers. CSP is tuned for this site's realities: an inline <script>
+// in the head (theme FOUC guard), inline styles, data: URI image placeholders,
+// and the Google Maps <iframe>. 'unsafe-inline' on script/style is required
+// while the FOUC guard has no nonce — revisit if a nonce pipeline is added.
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:'],
+        frameSrc: ['maps.google.com', 'google.com', 'www.google.com'],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: null,
+      },
+    },
+    frameguard: { action: 'deny' },
+    crossOriginEmbedderPolicy: false,
+  })
+);
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cookieParser(process.env.SESSION_SECRET || 'dev-secret'));
+app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/uploads', express.static(uploadsDir));
 
@@ -50,6 +79,20 @@ app.use('/', publicRoutes);
 
 app.use((req, res) => {
   res.status(404).render('public/404.njk', { title: 'Página não encontrada — Padel Experience' });
+});
+
+// Central error handler: log server-side, never leak a stack to the client.
+// Admin paths get the styled error page; everything else a plain 500.
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  if (res.headersSent) return next(err);
+  if (req.path.startsWith('/admin')) {
+    return res.status(500).render('admin/error.njk', {
+      title: 'Erro',
+      message: 'Não foi possível concluir a operação. Tente novamente.',
+    });
+  }
+  res.status(500).send('Erro interno do servidor.');
 });
 
 // No top-level await: Hostinger's runner require()s the entry file, and

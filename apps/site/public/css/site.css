@@ -607,3 +607,23 @@ details.audit[open] summary{border-bottom:1px solid var(--border)}
 .form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
 .form-thumb{width:120px;height:90px;object-fit:cover;border-radius:12px;border:1px solid var(--border)}
 .pending-list{margin:0;padding-left:18px;color:var(--muted);line-height:1.7;font-size:14px}
+
+/* ---------- contrast fixes (WCAG AA) ----------
+   Raw lime/gold tokens fail 4.5:1 on light surfaces, so the light theme
+   darkens them by mixing with the navy token (same color-mix pattern the
+   guide itself uses). Computed ratios:
+   - eyebrow/partner-role: 5.5:1 on white, 5.1:1 on --bg
+   - hero h1 span: 5.3:1 on --bg
+   - promo price: 5.1:1 on --surface-2
+   - badge.highlight text: 5.4:1 light / 9.2:1 dark (was ~3.4:1 in both) */
+.badge.highlight{color:var(--lime-500)}
+html[data-theme="light"] .eyebrow,
+html[data-theme="light"] .partner-role{color:color-mix(in srgb,var(--gold-400) 50%,var(--navy-900))}
+/* .cta keeps its navy gradient in both themes — restore the light gold there */
+html[data-theme="light"] .cta .eyebrow{color:var(--gold-400)}
+html[data-theme="light"] .hero h1 span,
+html[data-theme="light"] .price-card.promo .price,
+html[data-theme="light"] .badge.highlight{color:color-mix(in srgb,var(--lime-500) 40%,var(--navy-900))}
+
+/* the #inicio anchor now lives on the hero section; keep it clear of the sticky topbar */
+.hero{scroll-margin-top:96px}

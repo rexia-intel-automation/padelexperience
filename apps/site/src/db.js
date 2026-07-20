@@ -109,6 +109,14 @@ function placeholderImage(width, height, bg, label) {
 // ---------- seeds (run once, only when tables are empty) ----------
 
 async function seed() {
+  // Content (users, equipment, partners, gallery, promos) is seeded at most once,
+  // ever — guarded by this persistent flag, not just COUNT==0. Otherwise, once the
+  // client empties a collection via the CMS, the next restart would resurrect the
+  // defaults. On a pre-flag DB (e.g. today's already-populated production DB) this
+  // runs once with the existing COUNT==0 guards still in place (so nothing already
+  // there gets duplicated), then writes the flag so it never runs again.
+  const contentSeeded = await get("SELECT value FROM settings WHERE `key` = 'content_seeded'");
+  if (!contentSeeded) {
   const userCount = (await get('SELECT COUNT(*) AS n FROM users')).n;
   if (userCount === 0) {
     const email = process.env.ADMIN_EMAIL || 'admin@padelexperience.com.br';
@@ -201,6 +209,9 @@ async function seed() {
     for (const item of items) {
       await run('INSERT INTO gallery (image, caption, sort) VALUES (?, ?, ?)', [item.image, item.caption, item.sort]);
     }
+  }
+
+  await run("INSERT IGNORE INTO settings (`key`, value) VALUES ('content_seeded', '1')");
   }
 
   // Values below come from the style guide content section; empty values are pending
