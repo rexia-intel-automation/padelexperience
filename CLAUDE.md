@@ -18,10 +18,12 @@ Admin: `http://localhost:3000/admin/login` — credenciais em `apps/site/.env` (
 
 ## Arquitetura
 
-Monorepo npm workspaces, Node 22 (`.nvmrc`), **um único app** em `apps/site`: Express + nunjucks (SSR) + MySQL (mysql2), sem bundler e sem build step — deliberado, para compatibilidade com o Node.js hosting nativo da Hostinger (deploy futuro na conta do cliente; `padelexperience.com.br` NÃO está na conta Hostinger da RexIA).
+Monorepo npm workspaces, Node 22 (`.nvmrc`), **um único app** em `apps/site`: Express + nunjucks (SSR) + MySQL (mysql2), sem bundler e sem build step.
+
+**Produção (desde 2026-07-22): VPS RexIA `31.97.175.68`** — clone em `/home/rex/projects/padelexperience` (branch `main`), PM2 `padelexp` sob o usuário `rex` (porta 4210, roda com Node 24 da VPS), nginx + Let's Encrypt servindo `https://padelexperience.com.br` (+ `www`, redirect HTTP→HTTPS). Deploy = `git pull` + `pm2 restart padelexp` na VPS; `.env` de produção em `apps/site/.env` no servidor (não é apagado por deploy). O domínio e o DNS ficam na conta Hostinger do CLIENTE (único registro apontando para a RexIA: A `@` → 31.97.175.68). O antigo Node.js hosting do hPanel (bisque-elephant, ver `scripts/staging-sync-env.sh`, hoje obsoleto) foi descontinuado.
 
 - `src/server.js` — entrypoint (`server.js` na raiz do repo é só o shim que o preset Express da Hostinger exige); `src/db.js` — pool mysql2 + schema + seeds (CREATE TABLE IF NOT EXISTS + seed quando vazio, no boot); `src/auth.js` — scrypt + cookie assinado + CSRF + rate limit; `src/routes/{public,admin}.js`.
-- Banco: MySQL/MariaDB remoto da Hostinger — env vars `DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD` obrigatórias em `apps/site/.env` (dev local usa o MESMO banco do staging; credenciais e conexão SSH do staging em `apps/site/.env.staging`, ambos gitignored). Uploads da galeria viram webp (sharp) e vivem na tabela `media` (LONGBLOB), servidos por `/media/:id` — nada de imagem no filesystem; o banco sobrevive aos redeploys (que apagam o dir do app, ver `scripts/staging-sync-env.sh`).
+- Banco: MySQL/MariaDB remoto da Hostinger (conta compartilhada RexIA, `u922209553_padel` em `srv1597.hstgr.io`) — env vars `DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD` obrigatórias em `apps/site/.env` (dev local usa o MESMO banco da produção; credenciais em `apps/site/.env.staging`, ambos gitignored). Uploads da galeria viram webp (sharp) e vivem na tabela `media` (LONGBLOB), servidos por `/media/:id` — nada de imagem no filesystem.
 - Site público é **one-page** (`/` com âncoras `#inicio #reservas #equipamentos #localizacao #experiencia #parceiros`) seguindo a "arquitetura de conteúdo recomendada" do style guide. Navegação principal = **dock** flutuante (scroll-spy via IntersectionObserver em `public/js/main.js`).
 - CMS (`/admin`): coleções equipment, partners, gallery + settings (chave/valor). Conteúdo aparece no site imediatamente (SSR lê o banco a cada request).
 
